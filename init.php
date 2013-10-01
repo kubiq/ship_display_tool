@@ -1,7 +1,7 @@
 <?php
-$modInfo['ship_tool_kb']['name'] = "Ship Display Tool";
-$modInfo['ship_tool_kb']['abstract'] = "Displays Ship stats on the kill detials page";
-$modInfo['ship_tool_kb']['about'] = "by Spark's";
+$modInfo['ship_display_tool']['name'] = "Ship Display Tool";
+$modInfo['ship_display_tool']['abstract'] = "Displays Ship stats on the kill detials page";
+$modInfo['ship_display_tool']['about'] = "by Spark's";
 
 //require_once('common/includes/class.kill.php');
 //require_once('common/includes/class.killsummarytable.php');
@@ -2656,19 +2656,19 @@ where typeID = ".$value['itemid']);
 	$arr = self::$shipStats->getShipSlots();
 
 	for($h = $hig; $h < $arr['hislots']; $h++) {
-		self::$modSlots[1][] = array('id'=> 0,'name'=> 'Empty High Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_tool_kb/images/equipment/icon00_hig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+		self::$modSlots[1][] = array('id'=> 0,'name'=> 'Empty High Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_display_tool/images/equipment/icon00_hig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 	}
 
 	for($m = $mid; $m < $arr['medslots']; $m++) {
-		self::$modSlots[2][] = array('id'=> 0,'name'=> 'Empty Mid Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_tool_kb/images/equipment/icon00_mid.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+		self::$modSlots[2][] = array('id'=> 0,'name'=> 'Empty Mid Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_display_tool/images/equipment/icon00_mid.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 	}
 
 	for($l = $low; $l < $arr['lowslots']; $l++) {
-		self::$modSlots[3][] = array('id'=> 0,'name'=> 'Empty Low Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_tool_kb/images/equipment/icon00_low.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+		self::$modSlots[3][] = array('id'=> 0,'name'=> 'Empty Low Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_display_tool/images/equipment/icon00_low.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 	}
 
 	for($r = $rig; $r < $arr['rigslots']; $r++) {
-		self::$modSlots[5][] = array('id'=> 0,'name'=> 'Empty Rig Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_tool_kb/images/equipment/icon00_rig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+		self::$modSlots[5][] = array('id'=> 0,'name'=> 'Empty Rig Slot', 'iconloc'=> ((self::$simpleurl)?fittingTools::curPageURL():"").'mods/ship_display_tool/images/equipment/icon00_rig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 	}
 
 	if(!empty(self::$modSlots[7])) {
@@ -5680,7 +5680,7 @@ function displayShipStats($param_ship, $param_shipimgx, $param_shipimgy) {
 	$smarty->assign('modSlotsa', self::$modSlots[10]);
 	$smarty->assign('displayOutput', fittingTools::displayOutput());
 
-	return $smarty->fetch("../../../mods/ship_tool_kb/ship_display_tool.tpl");
+	return $smarty->fetch("../../../mods/ship_display_tool/ship_display_tool.tpl");
 }
 
 
@@ -5900,8 +5900,6 @@ function toMinutesAndHours($seconds)
 
 
 
-
-
 function statOntoShip($stat_param, $numChange_param, $type_param, $mode_param, $negEffect) {
 
 	if(!$negEffect) {
@@ -5951,8 +5949,8 @@ function displayOutput() {
 	$currentversion = "3.0";
 
 	$title = "EvE Ship Display Tool (v$currentversion) developed by Spark\'s (Chris Sheppard)";
-	$body = "Special thanks to Hans Glockenspiel (In-Game name) and kazhkaz (Region name coder) for helping out.<br><br><br>The Stats may not be 100% correct but maybe corrected so please contact me, my aim is to make sure that these stats are correct.<br><br>Any issues with the Display tool Please send Spark\'s in Game EvE Mail or go to the eve-dev forum to post: <a href=\'http://eve-id.net/forum/viewtopic.php?f=505&t=17295\' target=\'_blank\'>Here</a>. Please provide as much information as you can regarding the error. A link to the killmail would be great aswell.<br><br><a href=\'".fittingTools::curPageURL()."mods/ship_tool_kb/images/ShipInfo.jpg\' target=\'_blank\'>Click here for ship display</a><br><br>Change log:<br>3.0: Asorted fixes across all ships. Complete overhaul of the stat system. Clean up of the code.<br>2.9: Fixed Stealth bomber Powergrid issues. Fixed Acillary Shield bosters. Made ship images feed from Eve-online.<br>2.8: Fixed inferno modules and sorted new covert ops ships background positions<br>2.7: Some more fixes, especially to background colours. Now editable to match your background<br>2.6: Assorted fixes to CPU and power grid <br>2.5: New look simular to in game, better performance, CPU, Powergrid, Calibration, Final blow, Top damage, API verification, Turret and Missile added.<br>2.1: Fixed noob ships. Fixed display none base root sites. Again Chimeria Fixed. Classified Systems fixed. Damage 0 fixed. Images now use built in EDK4 OO Item to get image data. Simple URL with Ship mod Fixed.<br>2.0: No longer needs module images, gets them from Killboard. Works with EDK4. Added new ships to list<br>1.7: Fixing MWD and Bubble scripts<br>1.6: Cap injector fix<br>1.5: Minor Fixes<br>1.4: Fixed slot issue<br>1.3: Improved load performance again. Rework of code functionality. Page load much better than before. Changed the layout. Fixed ship positions. Fixed DPS on some ships. Added Super cap/Carrier/Dread drone counts with Drone Control link fix. Tweaks to the Tech III ships<br>1.2: Improved load performance<br>1.1: MWD stats fixed again<br>1.0: Add system colours. Fixed minior bugs<br>0.99: Added MWD icon. Added Region name on the kill display. Added new tags<br>0.98: Support for the new incusion ships<br>0.95: Fixed ship ID issue and realigned images<br>0.93: Fixed issue with Marauders<br>0.92: Fixed Citadel cruise launchers bug<br>0.9: Added admin support - Now you can select your panel background<br>0.75: Fixed % Bug on ships involved<br>0.73: Added Structure tank support<br>0.72: Fixed Drones displaying more than 5. Fixed portraits. Fixed some of the ship images<br>0.71: Added Chimeria and Hel images<br>0.7: Better support against errors. Added Missing mod slots. Minor fixes<br>0.6: better support for structures<br>0.55: Fixed Tech III propulsion and engineering sub systems. Minor Rework to Smartbombs and to Cap Batteries. Fixed Tech III ship images<br>0.51: Added support for Smart bombs. Fixed Info Screen<br>0.5: Displays Stats, icons and ship image with pilot stats<br><br><a href=\'http://www.elementstudio.co.uk\' target=\'_blank\'>Element Studio production</a></div>";
-	$display .= "<html><head><link rel=\'stylesheet\' type=\'text/css\' href=\'".fittingTools::curPageURL()."mods/ship_tool_kb/style/style.css\' /><link rel=\'stylesheet\' type=\'text/css\' href=\'".fittingTools::curPageURL()."themes/default/default.css\' /><title>Ship Display Tool</title></head><body><div id=\'frame\'><div id=\'topImg\'></div><div id=\'titleBar\'>$title</div><div id=\'bodyBar\'>$body</div></body></html>";
+	$body = "Special thanks to Hans Glockenspiel (In-Game name) and kazhkaz (Region name coder) for helping out.<br><br><br>The Stats may not be 100% correct but maybe corrected so please contact me, my aim is to make sure that these stats are correct.<br><br>Any issues with the Display tool Please send Spark\'s in Game EvE Mail or go to the eve-dev forum to post: <a href=\'http://eve-id.net/forum/viewtopic.php?f=505&t=17295\' target=\'_blank\'>Here</a>. Please provide as much information as you can regarding the error. A link to the killmail would be great aswell.<br><br><a href=\'".fittingTools::curPageURL()."mods/ship_display_tool/images/ShipInfo.jpg\' target=\'_blank\'>Click here for ship display</a><br><br>Change log:<br>3.0: Asorted fixes across all ships. Complete overhaul of the stat system. Clean up of the code.<br>2.9: Fixed Stealth bomber Powergrid issues. Fixed Acillary Shield bosters. Made ship images feed from Eve-online.<br>2.8: Fixed inferno modules and sorted new covert ops ships background positions<br>2.7: Some more fixes, especially to background colours. Now editable to match your background<br>2.6: Assorted fixes to CPU and power grid <br>2.5: New look simular to in game, better performance, CPU, Powergrid, Calibration, Final blow, Top damage, API verification, Turret and Missile added.<br>2.1: Fixed noob ships. Fixed display none base root sites. Again Chimeria Fixed. Classified Systems fixed. Damage 0 fixed. Images now use built in EDK4 OO Item to get image data. Simple URL with Ship mod Fixed.<br>2.0: No longer needs module images, gets them from Killboard. Works with EDK4. Added new ships to list<br>1.7: Fixing MWD and Bubble scripts<br>1.6: Cap injector fix<br>1.5: Minor Fixes<br>1.4: Fixed slot issue<br>1.3: Improved load performance again. Rework of code functionality. Page load much better than before. Changed the layout. Fixed ship positions. Fixed DPS on some ships. Added Super cap/Carrier/Dread drone counts with Drone Control link fix. Tweaks to the Tech III ships<br>1.2: Improved load performance<br>1.1: MWD stats fixed again<br>1.0: Add system colours. Fixed minior bugs<br>0.99: Added MWD icon. Added Region name on the kill display. Added new tags<br>0.98: Support for the new incusion ships<br>0.95: Fixed ship ID issue and realigned images<br>0.93: Fixed issue with Marauders<br>0.92: Fixed Citadel cruise launchers bug<br>0.9: Added admin support - Now you can select your panel background<br>0.75: Fixed % Bug on ships involved<br>0.73: Added Structure tank support<br>0.72: Fixed Drones displaying more than 5. Fixed portraits. Fixed some of the ship images<br>0.71: Added Chimeria and Hel images<br>0.7: Better support against errors. Added Missing mod slots. Minor fixes<br>0.6: better support for structures<br>0.55: Fixed Tech III propulsion and engineering sub systems. Minor Rework to Smartbombs and to Cap Batteries. Fixed Tech III ship images<br>0.51: Added support for Smart bombs. Fixed Info Screen<br>0.5: Displays Stats, icons and ship image with pilot stats<br><br><a href=\'http://www.elementstudio.co.uk\' target=\'_blank\'>Element Studio production</a></div>";
+	$display .= "<html><head><link rel=\'stylesheet\' type=\'text/css\' href=\'".fittingTools::curPageURL()."mods/ship_display_tool/style/style.css\' /><link rel=\'stylesheet\' type=\'text/css\' href=\'".fittingTools::curPageURL()."themes/default/default.css\' /><title>Ship Display Tool</title></head><body><div id=\'frame\'><div id=\'topImg\'></div><div id=\'titleBar\'>$title</div><div id=\'bodyBar\'>$body</div></body></html>";
 
 
 	//$jscommand = "newwindow2=window.open('','','height=500,width=300,toolbar=no,scrollbars=yes');	var tmp = newwindow2.document;	tmp.write('<html><head><title>Ship Display Tool</title></head><body>".$display."</body></html>');tmp.close();";

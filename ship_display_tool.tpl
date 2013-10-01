@@ -1,4 +1,4 @@
-<link rel='stylesheet' href='{$simpleurlheader}/mods/ship_tool_kb/style/style.css' type='text/css' media='all' />
+<link rel='stylesheet' href='{$simpleurlheader}/mods/ship_display_tool/style/style.css' type='text/css' media='all' />
 
 
 <div class='controllerFitter'>
@@ -380,7 +380,7 @@
 	</div>
 
 	<div id='infoIcon'>
-		<a href='#' onclick='{$displayOutput}'><img src='{$simpleurlheader}/mods/ship_tool_kb/images/flashImage/icon.png' alt='Info' title='Info' /></a>
+		<a href='#' onclick='{$displayOutput}'><img src='{$simpleurlheader}/mods/ship_display_tool/images/flashImage/icon.png' alt='Info' title='Info' /></a>
 	</div>
 </div>
 </div>
