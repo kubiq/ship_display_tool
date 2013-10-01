@@ -21,6 +21,7 @@ event::register("killDetail_context_assembling", "fittingTools::RemoveContextFin
 
 class fittingTools {
 
+    /** @var shipstats */
 	public static $shipStats;
 	public static $speedV = 1;
 	public static $speedB = 1;
@@ -102,21 +103,26 @@ class fittingTools {
 	public static $loadCPUAdd = Array();
 	public static $loadPowerAdd = Array();
 
-	function addFitting($home) {
+	static function addFitting($home) {
 
 		$home->delete("fitting");
 		$home->delete("victim");
 		$home->delete("victimShip");
+		$home->delete("finalblow");
+		$home->delete("topdamage");
+		$home->delete("itemsLost");
+		$home->delete("involved");
+		$home->delete("comments");
 		$home->addBehind("start", "fittingTools::displayFitting");
 		//$home->replace("top", "fittingTools::displayFitting");
 	}
 
-	function RemoveContextFinalBlowTopDamage($home) {
+	static function RemoveContextFinalBlowTopDamage($home) {
 
 		$home->delete("damageBox");
 	}
 
-	function displayFitting($home) {
+	static function displayFitting($home) {
 
 		global $smarty;
 		//require_once("common/includes/class.dogma.php");
@@ -139,6 +145,7 @@ class fittingTools {
 			$km = new Kill($home->kll_external_id, true);
 			$km = $home->kill->getID();
 		}
+        /** @var Kill $km */
 
 		if (!$km->exists()) {
 			$html = "That kill doesn't exist.";
@@ -388,7 +395,7 @@ class fittingTools {
 
 		fittingTools::getShipStats($shipname);
 		fittingTools::moduleInfo($theFit);
-		/*fittingTools::getModuleStats();*/
+//		fittingTools::getModuleStats();
 
 		fittingTools::returnShipSkills();
 		fittingTools::shipEffects();
@@ -402,7 +409,7 @@ class fittingTools {
 		return $html;
 	}
 
-	public function source($p_kll_id, $p_ex_id) {
+	public static function source($p_kll_id, $p_ex_id) {
 
 		global $smarty;
 
@@ -458,7 +465,7 @@ class fittingTools {
 		$smarty->assign('extid', self::$extid);
 	}
 
-	function getCPUandPowerValues() {
+	static function getCPUandPowerValues() {
 
 		$stack = 1;
 		foreach (self::$loadPowerAdd as $value) {
@@ -594,9 +601,9 @@ class fittingTools {
 
 	}
 
-	function getShipStats($param_ship) {
+	static function getShipStats($param_ship) {
 
-		//global $shipStats;
+//		global $shipStats;
 
 		$qry = new DBQuery();
 		$qry->execute("select kb3_invtypes.typeID, kb3_invtypes.description from kb3_invtypes WHERE kb3_invtypes.typeName = '" . $param_ship . "'");
@@ -773,7 +780,7 @@ where typeID = " . $typeID['typeID']);
 		//echo self::$shipStats->getMass();
 	}
 
-	function returnShipSize($input) {
+	static function returnShipSize($input) {
 
 		switch ($input) {
 			case "1":
@@ -791,7 +798,7 @@ where typeID = " . $typeID['typeID']);
 		}
 	}
 
-	function calculateMass($param_mass) {
+	static function calculateMass($param_mass) {
 
 		//1.482e+07
 		$break = explode("e+", $param_mass);
@@ -804,7 +811,7 @@ where typeID = " . $typeID['typeID']);
 		return ($break[0] * $exp);
 	}
 
-	function setlevel5Skills() {
+	static function setlevel5Skills() {
 
 		//global $shipStats;
 
@@ -843,7 +850,7 @@ where typeID = " . $typeID['typeID']);
 
 	}
 
-	function getExtraStats() {
+	static function getExtraStats() {
 
 		//global $shipStats;
 
@@ -991,7 +998,7 @@ where typeID = " . $typeID['typeID']);
 
 	}
 
-	function getShipDrone($shipname) {
+	static function getShipDrone($shipname) {
 
 		if (strstr(strtolower($shipname), "nyx")
 			|| strstr(strtolower($shipname), "aeon")
@@ -1015,7 +1022,7 @@ where typeID = " . $typeID['typeID']);
 
 	}
 
-	function setAndOrderShipResists() {
+	static function setAndOrderShipResists() {
 
 		$orderSystem = Array(
 			4 => "subsystem",
@@ -1141,7 +1148,7 @@ where typeID = " . $typeID['typeID']);
 
 	}
 
-	function returnTankResults($tankType) {
+	static function returnTankResults($tankType) {
 
 		/*echo "<pre>";
 	print_r(self::$shipStats->getTankBoost());
@@ -1172,7 +1179,7 @@ where typeID = " . $typeID['typeID']);
 		return $total / $dur;
 	}
 
-	function boostDuration($type) {
+	static function boostDuration($type) {
 
 		$j = 0;
 		if (self::$shipStats->getTankBoost()) {
@@ -1208,7 +1215,7 @@ where typeID = " . $typeID['typeID']);
 		return ($total / $j);
 	}
 
-	function armorAmpDur($dur) {
+	static function armorAmpDur($dur) {
 
 		$total = $dur;
 
@@ -1227,7 +1234,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function shieldAmpDur($dur) {
+	static function shieldAmpDur($dur) {
 
 		$total = $dur;
 
@@ -1246,7 +1253,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function shieldAmpBooster($boostAmount, $icon) {
+	static function shieldAmpBooster($boostAmount, $icon) {
 
 		$total = $boostAmount;
 
@@ -1280,7 +1287,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function armorAmpBooster($boostAmount) {
+	static function armorAmpBooster($boostAmount) {
 
 		$total = $boostAmount;
 
@@ -1308,7 +1315,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function setSigBoostforWarpDis() {
+	static function setSigBoostforWarpDis() {
 
 		if (self::$shipStats->getSigRadiusBoost()) {
 			foreach (self::$shipStats->getSigRadiusBoost() as $i => $value) {
@@ -1320,7 +1327,7 @@ where typeID = " . $typeID['typeID']);
 
 	}
 
-	function sensorBoosterAdd() {
+	static function sensorBoosterAdd() {
 
 		self::$scan = 0;
 		self::$range = 0;
@@ -1445,7 +1452,7 @@ where typeID = " . $typeID['typeID']);
 		}
 	}
 
-	function getDroneSkillDamage() {
+	static function getDroneSkillDamage() {
 
 		$k = 0;
 		if (self::$shipStats->getDroneDamage()) {
@@ -1513,7 +1520,7 @@ where typeID = " . $typeID['typeID']);
 		return $arr;
 	}
 
-	function remoteRepStats() {
+	static function remoteRepStats() {
 
 		foreach (self::$shipStats->getTransCap() as $i => $value) {
 			$cap = $value['capNeeded'];
@@ -1546,7 +1553,7 @@ where typeID = " . $typeID['typeID']);
 
 	}
 
-	function getDPS() {
+	static function getDPS() {
 
 		$total = 0;
 		/*echo "<pre>";
@@ -1584,7 +1591,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function getVolley() {
+	static function getVolley() {
 
 		$total = 0;
 		if (self::$shipStats->getDamageGun()) {
@@ -1596,7 +1603,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function getDPSAndVolley() {
+	static function getDPSAndVolley() {
 
 		$avDPS;
 		$condition = "";
@@ -1669,7 +1676,7 @@ where typeID = " . $typeID['typeID']);
 		}
 	}
 
-	function turretMods() {
+	static function turretMods() {
 
 		foreach (self::$shipStats->getDamageGun() as $i => $value) {
 
@@ -1898,7 +1905,7 @@ where typeID = " . $typeID['typeID']);
 		return $arr;
 	}
 
-	function setDamageModSkills($param_type, $param_input, $param_techModLevel) {
+	static function setDamageModSkills($param_type, $param_input, $param_techModLevel) {
 
 		if ($param_type == "rofP" || $param_type == "rofL" || $param_type == "rofH") {
 
@@ -1965,7 +1972,7 @@ where typeID = " . $typeID['typeID']);
 		return $param_input;
 	}
 
-	function totalCapUse() {
+	static function totalCapUse() {
 
 		$total = 0;
 		if (self::$shipStats->getCapGJ()) {
@@ -1990,7 +1997,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function totalCapInjected() {
+	static function totalCapInjected() {
 
 		$total = 0;
 		if (self::$shipStats->getCapInj()) {
@@ -2011,7 +2018,7 @@ where typeID = " . $typeID['typeID']);
 		return $total;
 	}
 
-	function capacitorInjector() {
+	static function capacitorInjector() {
 
 		//print_r(self::$shipStats->getCapInj());
 
@@ -2041,7 +2048,7 @@ where typeID = " . $typeID['typeID']);
 		return $arr;
 	}
 
-	function capInjEmpty($modCap) {
+	static function capInjEmpty($modCap) {
 
 		if ($modCap == "160") {
 			$arr['amount'] = "800";
@@ -2060,7 +2067,7 @@ where typeID = " . $typeID['typeID']);
 		return $arr;
 	}
 
-	function capacitorUsage() {
+	static function capacitorUsage() {
 
 		foreach (self::$shipStats->getCapGJ() as $i => $value) {
 			$dur = fittingTools::getSkillset($value['name'], "duration", $value['duration']);
@@ -2103,13 +2110,13 @@ where typeID = " . $typeID['typeID']);
 		return $arr;
 	}
 
-	function propCeptorBonus($cap, $off) {
+	static function propCeptorBonus($cap, $off) {
 
 		return $cap - (($cap / 100) * $off);
 
 	}
 
-	function getSkillset($param_module, $param_type, $param_value) {
+	static function getSkillset($param_module, $param_type, $param_value) {
 
 		if (fittingTools::advancedModuleSettings($param_module) == "mwd") {
 			if ($param_type == "duration") {
@@ -2299,7 +2306,7 @@ where typeID = " . $typeID['typeID']);
 		return $param_value;
 	}
 
-	function isSmartBomb($param_module) {
+	static function isSmartBomb($param_module) {
 
 		if (strstr(strtolower($param_module), "smartbomb")
 			|| strstr(strtolower($param_module), "notos")
@@ -2314,7 +2321,7 @@ where typeID = " . $typeID['typeID']);
 		return false;
 	}
 
-	function getShipSpeed($shipSpeed, $boost, $thrust, $mass) {
+	static function getShipSpeed($shipSpeed, $boost, $thrust, $mass) {
 
 		return $shipSpeed * (1 + (($boost / 100) * (1 + 5 * 0.05) * ($thrust / $mass)));
 	}
@@ -2323,7 +2330,7 @@ where typeID = " . $typeID['typeID']);
 	public static $droneSlots;
 	public static $cargoSlots;
 
-	function moduleInfo($param_moduleArray) {
+	static function moduleInfo($param_moduleArray) {
 
 		$low = 0;
 		$mid = 0;
@@ -2351,7 +2358,7 @@ where typeID = " . $typeID['typeID']);
 		[name] => E500 Prototype Energy Vampire
 		[groupID] => 68
 		[chargeSize] =>
-		[itemid] => 16501
+		['itemid'] => 16501
 		[id] => 16501
 		[capacity] => 0
 		[mass] => 1000
@@ -2370,20 +2377,20 @@ where typeID = " . $typeID['typeID']);
 				foreach ($param_moduleArray[$j] as $i => $value) {
 					//echo $value['itemid']." -> <br />";
 
-					$item = new Item($value[itemid]);
+					$item = new Item($value['itemid']);
 
 					if (array_key_exists($value['itemid'], $moduleArr)) {
-						//echo $value[itemid]." -> ".$moduleArr[$value[itemid]]['name']." - > ".self::$moduleCount." -> ".$moduleArr[$value[itemid]]["ignore"]."<br />";
-						if ($moduleArr[$value[itemid]]["ignore"] !== true) {
-							self::$modSlots[$j][] = array('id' => $moduleArr[$value[itemid]]['id'], 'name' => $moduleArr[$value[itemid]]['name'], 'groupID' => $moduleArr[$value[itemid]]['groupID'], 'icon' => $moduleArr[$value[itemid]]['icon'], 'iconloc' => $moduleArr[$value[itemid]]['iconloc'], 'metaLevel' => $moduleArr[$value[itemid]]["metaLevel"], 'techLevel' => $moduleArr[$value[itemid]]["techLevel"], 'capacity' => $moduleArr[$value[itemid]]['capacity'], 'volume' => $moduleArr[$value[itemid]]['volume'], 'mass' => $moduleArr[$value[itemid]]['mass']);
+						//echo $value['itemid']." -> ".$moduleArr[$value['itemid']]['name']." - > ".self::$moduleCount." -> ".$moduleArr[$value['itemid']]["ignore"]."<br />";
+						if ($moduleArr[$value['itemid']]["ignore"] !== true) {
+							self::$modSlots[$j][] = array('id' => $moduleArr[$value['itemid']]['id'], 'name' => $moduleArr[$value['itemid']]['name'], 'groupID' => $moduleArr[$value['itemid']]['groupID'], 'icon' => $moduleArr[$value['itemid']]['icon'], 'iconloc' => $moduleArr[$value['itemid']]['iconloc'], 'metaLevel' => $moduleArr[$value['itemid']]["metaLevel"], 'techLevel' => $moduleArr[$value['itemid']]["techLevel"], 'capacity' => $moduleArr[$value['itemid']]['capacity'], 'volume' => $moduleArr[$value['itemid']]['volume'], 'mass' => $moduleArr[$value['itemid']]['mass']);
 
-							$valueinput = explode(",", $moduleArr[$value[itemid]]['value']);
-							$attributeName = explode(",", $moduleArr[$value[itemid]]['attributeName']);
-							$displayName = explode(",", $moduleArr[$value[itemid]]['displayName']);
-							$stackable = explode(",", $moduleArr[$value[itemid]]['stackable']);
-							$unit = explode(",", $moduleArr[$value[itemid]]['unit']);
+							$valueinput = explode(",", $moduleArr[$value['itemid']]['value']);
+							$attributeName = explode(",", $moduleArr[$value['itemid']]['attributeName']);
+							$displayName = explode(",", $moduleArr[$value['itemid']]['displayName']);
+							$stackable = explode(",", $moduleArr[$value['itemid']]['stackable']);
+							$unit = explode(",", $moduleArr[$value['itemid']]['unit']);
 
-							//echo $moduleArr[$value[itemid]]['name']." -> <br />";
+							//echo $moduleArr[$value['itemid']]['name']." -> <br />";
 							for ($k = 0; $k < count($valueinput); $k++) {
 
 								if ($valueinput != "") {
@@ -2395,16 +2402,16 @@ where typeID = " . $typeID['typeID']);
 
 									$neg = fittingTools::negRules($stackable[$k], $unit[$k]);
 									if ($j == 6) {
-										fittingTools::applyDroneSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value[itemid]]['groupID'], $moduleArr[$value[itemid]]['capacity'], $moduleArr[$value[itemid]]['name'], $moduleArr[$value[itemid]]["techLevel"], $j);
+										fittingTools::applyDroneSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $j);
 									} else {
-										//echo $moduleArr[$value[itemid]]['name']."<br />";
-										fittingTools::applyShipSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value[itemid]]['groupID'], $moduleArr[$value[itemid]]['capacity'], $moduleArr[$value[itemid]]['name'], $moduleArr[$value[itemid]]["techLevel"], $j, $moduleArr[$value[itemid]]['mass']);
+										//echo $moduleArr[$value['itemid']]['name']."<br />";
+										fittingTools::applyShipSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $j, $moduleArr[$value['itemid']]['mass']);
 									}
 								}
 							}
 						} else {
-							if (self::$droneArr[$value[itemid]]['name']) {
-								self::$droneArr[$value[itemid]]['count']++;
+							if (self::$droneArr[$value['itemid']]['name']) {
+								self::$droneArr[$value['itemid']]['count']++;
 							}
 						}
 
@@ -2463,29 +2470,29 @@ where typeID = " . $value['itemid']);
 								//echo fittingTools::dumpDrones($typeID['typeName'])."<br />";
 								if (fittingTools::applyDroneSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], $value['volume'], $value['name'], $value["tech"], 6)) {
 
-									$moduleArr[$value[itemid]]['value'] .= $row['value'] . ",";
-									$moduleArr[$value[itemid]]['attributeName'] .= $row['attributeName'] . ",";
-									$moduleArr[$value[itemid]]['displayName'] .= $row['displayName'] . ",";
-									$moduleArr[$value[itemid]]['stackable'] .= $row['stackable'] . ",";
-									$moduleArr[$value[itemid]]['unit'] .= $row['unit'] . ",";
+									$moduleArr[$value['itemid']]['value'] .= $row['value'] . ",";
+									$moduleArr[$value['itemid']]['attributeName'] .= $row['attributeName'] . ",";
+									$moduleArr[$value['itemid']]['displayName'] .= $row['displayName'] . ",";
+									$moduleArr[$value['itemid']]['stackable'] .= $row['stackable'] . ",";
+									$moduleArr[$value['itemid']]['unit'] .= $row['unit'] . ",";
 
-									$moduleArr[$value[itemid]]['id'] = $value['id'];
-									$moduleArr[$value[itemid]]['name'] = $value['name'];
-									$moduleArr[$value[itemid]]['groupID'] = $value['groupID'];
-									$moduleArr[$value[itemid]]['techLevel'] = $value['tech'];
-									$moduleArr[$value[itemid]]['metaLevel'] = $value['meta'];
-									$moduleArr[$value[itemid]]['icon'] = $value['icon'];
-									$moduleArr[$value[itemid]]['iconloc'] = $item->getIcon(32);
-									$moduleArr[$value[itemid]]['capacity'] = $value['capacity'];
-									$moduleArr[$value[itemid]]['volume'] = $value['volume'];
-									$moduleArr[$value[itemid]]['mass'] = $value['mass'];
+									$moduleArr[$value['itemid']]['id'] = $value['id'];
+									$moduleArr[$value['itemid']]['name'] = $value['name'];
+									$moduleArr[$value['itemid']]['groupID'] = $value['groupID'];
+									$moduleArr[$value['itemid']]['techLevel'] = $value['tech'];
+									$moduleArr[$value['itemid']]['metaLevel'] = $value['meta'];
+									$moduleArr[$value['itemid']]['icon'] = $value['icon'];
+									$moduleArr[$value['itemid']]['iconloc'] = $item->getIcon(32);
+									$moduleArr[$value['itemid']]['capacity'] = $value['capacity'];
+									$moduleArr[$value['itemid']]['volume'] = $value['volume'];
+									$moduleArr[$value['itemid']]['mass'] = $value['mass'];
 
-									self::$droneArr[$value[itemid]]['name'] = $value['name'];
-									self::$droneArr[$value[itemid]]['count'] = 1;
+									self::$droneArr[$value['itemid']]['name'] = $value['name'];
+									self::$droneArr[$value['itemid']]['count'] = 1;
 
 								} else {
 
-									$moduleArr[$value[itemid]]['ignore'] = true;
+									$moduleArr[$value['itemid']]['ignore'] = true;
 
 								}
 								$drone_count++;
@@ -2494,33 +2501,33 @@ where typeID = " . $value['itemid']);
 
 								if (fittingTools::applyShipSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], (($j == 10) ? $value['volume'] : $value['capacity']), $value['name'], $value["tech"], $j, $value['mass'])) {
 									//echo $value['name']." - ".abs($row['value']). " - G". $value['groupID'] ." - ".$type." -".$row['attributeName']." -".$neg." - I".$typeID['icon']." -".$typeID['capacity']." -".$typeID['typeName']." -".$tech["value"]." -".$j."<br/>";
-									//echo $j." - ".$value['icon']." - ".$moduleArr[$value[itemid]]['iconloc']." - ".$value[itemid]."<br />";
-									$moduleArr[$value[itemid]]['value'] .= $row['value'] . ",";
-									$moduleArr[$value[itemid]]['attributeName'] .= $row['attributeName'] . ",";
-									$moduleArr[$value[itemid]]['displayName'] .= $row['displayName'] . ",";
-									$moduleArr[$value[itemid]]['stackable'] .= $row['stackable'] . ",";
-									$moduleArr[$value[itemid]]['unit'] .= $row['unit'] . ",";
+									//echo $j." - ".$value['icon']." - ".$moduleArr[$value['itemid']]['iconloc']." - ".$value['itemid']."<br />";
+									$moduleArr[$value['itemid']]['value'] .= $row['value'] . ",";
+									$moduleArr[$value['itemid']]['attributeName'] .= $row['attributeName'] . ",";
+									$moduleArr[$value['itemid']]['displayName'] .= $row['displayName'] . ",";
+									$moduleArr[$value['itemid']]['stackable'] .= $row['stackable'] . ",";
+									$moduleArr[$value['itemid']]['unit'] .= $row['unit'] . ",";
 
-									$moduleArr[$value[itemid]]['id'] = $value['id'];
-									$moduleArr[$value[itemid]]['name'] = $value['name'];
-									$moduleArr[$value[itemid]]['groupID'] = $value['groupID'];
-									$moduleArr[$value[itemid]]['techLevel'] = $value['tech'];
-									$moduleArr[$value[itemid]]['metaLevel'] = $value['meta'];
+									$moduleArr[$value['itemid']]['id'] = $value['id'];
+									$moduleArr[$value['itemid']]['name'] = $value['name'];
+									$moduleArr[$value['itemid']]['groupID'] = $value['groupID'];
+									$moduleArr[$value['itemid']]['techLevel'] = $value['tech'];
+									$moduleArr[$value['itemid']]['metaLevel'] = $value['meta'];
 
-									$moduleArr[$value[itemid]]['icon'] = $value['icon'];
+									$moduleArr[$value['itemid']]['icon'] = $value['icon'];
 
 									if ($j == 10 || $j == 6) {
-										$moduleArr[$value[itemid]]['iconloc'] = $item->getIcon(32);
-										//echo "10 ".$moduleArr[$value[itemid]]['icon']."<br />";
+										$moduleArr[$value['itemid']]['iconloc'] = $item->getIcon(32);
+										//echo "10 ".$moduleArr[$value['itemid']]['icon']."<br />";
 									} else {
-										//$moduleArr[$value[itemid]]['icon'] 		= $value['icon'];
-										$moduleArr[$value[itemid]]['iconloc'] = $item->getIcon(64, false);
-										//echo $moduleArr[$value[itemid]]['icon']."<br />";
+										//$moduleArr[$value['itemid']]['icon'] 		= $value['icon'];
+										$moduleArr[$value['itemid']]['iconloc'] = $item->getIcon(64, false);
+										//echo $moduleArr[$value['itemid']]['icon']."<br />";
 									}
 
-									$moduleArr[$value[itemid]]['capacity'] = (($j == 10) ? $value['volume'] : $value['capacity']);
-									$moduleArr[$value[itemid]]['volume'] = $value['volume'];
-									$moduleArr[$value[itemid]]['mass'] = $value['mass'];
+									$moduleArr[$value['itemid']]['capacity'] = (($j == 10) ? $value['volume'] : $value['capacity']);
+									$moduleArr[$value['itemid']]['volume'] = $value['volume'];
+									$moduleArr[$value['itemid']]['mass'] = $value['mass'];
 								}
 
 							}
@@ -2582,13 +2589,13 @@ where typeID = " . $value['itemid']);
 	echo "</pre>";*/
 	}
 
-	function getModuleStats() {
+	static function getModuleStats() {
 
 		$moduleArr = Array();
 
 	}
 
-	function ignoreMod($name) {
+	static function ignoreMod($name) {
 
 		if (strstr(strtolower($name), "drone link")
 			|| strstr(strtolower($name), "drone navigation")
@@ -2615,7 +2622,7 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function dumpDrones($name) {
+	static function dumpDrones($name) {
 
 		if (strpos(strtolower($name), "armor maintenance bot")) {
 			return false;
@@ -2640,7 +2647,7 @@ where typeID = " . $value['itemid']);
 		return true;
 	}
 
-	function advancedModuleSettings($param_input) {
+	static function advancedModuleSettings($param_input) {
 
 		if (strstr(strtolower($param_input), "microwarpdrive")
 			|| strstr(strtolower($param_input), "digital booster")
@@ -2663,7 +2670,7 @@ where typeID = " . $value['itemid']);
 		return "";
 	}
 
-	function negRules($param_input, $param_unit) {
+	static function negRules($param_input, $param_unit) {
 
 		switch ($param_input) {
 			case 'true':
@@ -2676,7 +2683,7 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function negConditions($param_input) {
+	static function negConditions($param_input) {
 
 		switch (strtolower($param_input)) {
 			case "hp":
@@ -2688,7 +2695,7 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function returnShipSkills() {
+	static function returnShipSkills() {
 
 		//echo self::$shipStats->getShipDesc();
 
@@ -2764,7 +2771,7 @@ where typeID = " . $value['itemid']);
 	echo "</pre>";*/
 	}
 
-	function organiseEffect($arrayInput) {
+	static function organiseEffect($arrayInput) {
 
 		$newformatedString = "";
 		$bonusAmount = "";
@@ -2806,7 +2813,7 @@ where typeID = " . $value['itemid']);
 		return $newformatedString;
 	}
 
-	function fixString($str) {
+	static function fixString($str) {
 
 		//breakStatement
 		//get the number at the front of the image
@@ -2818,7 +2825,7 @@ where typeID = " . $value['itemid']);
 		return preg_replace('/ and [0-9]+/', "*BRK*" . fittingTools::getNumberBack($str), $str);
 	}
 
-	function getNumberBack($str) {
+	static function getNumberBack($str) {
 
 		$break = explode(" and ", $str);
 		$i = 0;
@@ -2840,7 +2847,7 @@ where typeID = " . $value['itemid']);
 		return $num;
 	}
 
-	function sortEffects($input) {
+	static function sortEffects($input) {
 
 		$effectString = "";
 		$skillsetforparse = explode("*brk*", trim($input));
@@ -2860,7 +2867,7 @@ where typeID = " . $value['itemid']);
 		return $effectString;
 	}
 
-	function shipEffects() {
+	static function shipEffects() {
 
 		if (self::$shipStats->getShipEffects()) {
 			foreach (self::$shipStats->getShipEffects() as $i => $value) {
@@ -2870,7 +2877,7 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function applyDroneSkills($bonus, $type, $mode, $effect, $shipEff, $skillBonus, $negEffect, $groupID, $capacity, $modName, $techLevel) {
+	static function applyDroneSkills($bonus, $type, $mode, $effect, $shipEff, $skillBonus, $negEffect, $groupID, $capacity, $modName, $techLevel) {
 
 		if (strtolower($effect) == "emdamage") {
 			$arr = self::$shipStats->getDroneDamage();
@@ -2923,7 +2930,7 @@ where typeID = " . $value['itemid']);
 		return false;
 	}
 
-	function setTank($module_param) {
+	static function setTank($module_param) {
 
 		if (strstr(strtolower($module_param), "shield booster")
 			|| strstr(strtolower($module_param), "shield overload")
@@ -2952,7 +2959,7 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function applyShipSkills($bonus, $type, $mode, $effect, $shipEff, $skillBonus, $negEffect, $groupID, $capacity, $modName, $techLevel, $moduleLevel, $mass) {
+	static function applyShipSkills($bonus, $type, $mode, $effect, $shipEff, $skillBonus, $negEffect, $groupID, $capacity, $modName, $techLevel, $moduleLevel, $mass) {
 
 		fittingTools::setTank($modName);
 
@@ -5326,7 +5333,7 @@ where typeID = " . $value['itemid']);
 		return false;
 	}
 
-	function isReactor($modName) {
+	static function isReactor($modName) {
 
 		if (strstr(strtolower($modName), "reactor control")) {
 			return true;
@@ -5339,7 +5346,7 @@ where typeID = " . $value['itemid']);
 		return false;
 	}
 
-	function displayShipStats($param_ship, $param_shipimgx, $param_shipimgy) {
+	static function displayShipStats($param_ship, $param_shipimgx, $param_shipimgy) {
 
 		//global $shipStats;
 		global $smarty;
@@ -5394,7 +5401,7 @@ where typeID = " . $value['itemid']);
 		if (config::get('ship_display_back')) {
 			$smarty->assign('ship_display_back', config::get('ship_display_back'));
 		} else {
-			$smarty->assign('ship_display_back', "#222222");
+			$smarty->assign('ship_display_back', "#000000");
 		}
 
 		//$smarty->assign('simpleurl', self::$simpleurl);
@@ -5627,7 +5634,7 @@ where typeID = " . $value['itemid']);
 		return $smarty->fetch("../../../mods/ship_display_tool/ship_display_tool.tpl");
 	}
 
-	function getSystemColour($system) {
+	static function getSystemColour($system) {
 
 		switch ($system) {
 			case "0.0":
@@ -5670,7 +5677,7 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function getTechLevel($tech, $meta, $name) {
+	static function getTechLevel($tech, $meta, $name) {
 
 		switch ($tech) {
 			case "1":
@@ -5716,7 +5723,7 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function ShortenText($text, $chars) {
+	static function ShortenText($text, $chars) {
 
 		$count = strlen($text);
 		$text = substr($text, 0, $chars);
@@ -5727,7 +5734,7 @@ where typeID = " . $value['itemid']);
 		return $text;
 	}
 
-	function getSensorTypeImg($sensor_param) {
+	static function getSensorTypeImg($sensor_param) {
 
 		switch ($sensor_param) {
 			case "radar":
@@ -5749,17 +5756,17 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function returnPixelSize($amount_param, $pixil_param) {
+	static function returnPixelSize($amount_param, $pixil_param) {
 
 		return ($pixil_param / 100) * $amount_param;
 	}
 
-	function effectHP($hp, $em, $th, $ki, $ex) {
+	static function effectHP($hp, $em, $th, $ki, $ex) {
 
 		return $hp / (((1 - ($em / 100)) + (1 - ($th / 100)) + (1 - ($ki / 100)) + (1 - ($ex / 100))) / 4);
 	}
 
-	function peakShieldRecharge($shieldCap, $shieldRec) {
+	static function peakShieldRecharge($shieldCap, $shieldRec) {
 
 		if ($shieldRec == 0) {
 			return 0;
@@ -5768,17 +5775,17 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function tankAbleDPS($peakRegen, $em, $th, $ki, $ex) {
+	static function tankAbleDPS($peakRegen, $em, $th, $ki, $ex) {
 
 		return 4 * $peakRegen / ((1 - ($em / 100)) + (1 - ($th / 100)) + (1 - ($ki / 100)) + (1 - ($ex / 100)));
 	}
 
-	function getReppedArmorPerCycle($reppedAmount, $reppedCycle) {
+	static function getReppedArmorPerCycle($reppedAmount, $reppedCycle) {
 
 		return ($reppedAmount / $reppedCycle);
 	}
 
-	function isCapStable($capPS, $capUse) {
+	static function isCapStable($capPS, $capUse) {
 
 		if ($capPS >= $capUse) {
 			return true;
@@ -5788,7 +5795,7 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function capUsage($capAmount, $capUsage, $capRechagePS, $capRecharge) {
+	static function capUsage($capAmount, $capUsage, $capRechagePS, $capRecharge) {
 
 		if ($capRechagePS == 0) {
 			return 0;
@@ -5798,7 +5805,7 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function capUsagePer($capAmount, $capUsage, $capRechagePS, $capRecharge) {
+	static function capUsagePer($capAmount, $capUsage, $capRechagePS, $capRecharge) {
 
 		if ($capRechagePS == 0) {
 			return 0;
@@ -5814,7 +5821,7 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function toMinutesAndHours($seconds) {
+	static function toMinutesAndHours($seconds) {
 
 		$hoursmin = "";
 		$hours = intval(intval($seconds) / 3600);
@@ -5831,7 +5838,7 @@ where typeID = " . $value['itemid']);
 		return $hoursmin;
 	}
 
-	function statOntoShip($stat_param, $numChange_param, $type_param, $mode_param, $negEffect) {
+	static function statOntoShip($stat_param, $numChange_param, $type_param, $mode_param, $negEffect) {
 
 		if (!$negEffect) {
 			$negEffect = 1;
@@ -5850,12 +5857,12 @@ where typeID = " . $value['itemid']);
 		return 0;
 	}
 
-	function stackingPenalties($modNum) {
+	static function stackingPenalties($modNum) {
 
 		return pow(0.5, pow((($modNum - 1) / 2.22292081), 2));
 	}
 
-	function getLevel5SkillsPlus($skills_param, $base_param, $type_param, $negEffect) {
+	static function getLevel5SkillsPlus($skills_param, $base_param, $type_param, $negEffect) {
 
 		if ($type_param == "+") {
 			return (((1 - ($skills_param / 100)) * (fittingTools::stackingPenalties($negEffect) * $base_param)) + $skills_param);
@@ -5864,7 +5871,7 @@ where typeID = " . $value['itemid']);
 		}
 	}
 
-	function capInjector($capBooster, $storage, $size, $duration) {
+	static function capInjector($capBooster, $storage, $size, $duration) {
 
 		if ($capBooster == 0 || $storage == 0 || $size == 0 || $duration == 0) {
 			return 0;
@@ -5874,7 +5881,7 @@ where typeID = " . $value['itemid']);
 
 	}
 
-	function displayOutput() {
+	static function displayOutput() {
 
 		$currentversion = "3.0";
 		$display = '';
@@ -5892,7 +5899,7 @@ where typeID = " . $value['itemid']);
 		return "javascript:" . htmlentities($jscommand, ENT_QUOTES) . " void(0);";
 	}
 
-	function curPageURL() {
+	static function curPageURL() {
 
 		$pageURL = 'http';
 		if ($_SERVER["HTTPS"] == "on") {
@@ -5920,7 +5927,7 @@ where typeID = " . $value['itemid']);
 		return $pageURL;
 	}
 
-	function subsystemaddon($modname_param) {
+	static function subsystemaddon($modname_param) {
 
 		switch ($modname_param) {
 			case "Legion Defensive - Adaptive Augmenter":
