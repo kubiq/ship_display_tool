@@ -2303,31 +2303,38 @@ where typeID = " . $typeID['typeID']);
 
 	static function moduleInfo($param_moduleArray) {
 bd($param_moduleArray, '$param_moduleArray');
+		// pocty osazenych modulu
 		$low = 0;
 		$mid = 0;
 		$hig = 0;
 		$rig = 0;
 
 		$slots = ShipSlotEnum::getValues();
-
 		$moduleArr = [];
-//		$moduleArr = array_map(function ($module) {
-//
-//
-//		}, $param_moduleArray);
 
 		foreach ($slots as $slot) {
 			if ($param_moduleArray[$slot]) {
 				foreach ($param_moduleArray[$slot] as $value) {
-					//echo $value['itemid']." -> <br />";
+
 					bd($value, 'value');
 
 					$item = new Item($value['itemid']);
 
 					if (array_key_exists($value['itemid'], $moduleArr)) {
-						//echo $value['itemid']." -> ".$moduleArr[$value['itemid']]['name']." - > ".self::$moduleCount." -> ".$moduleArr[$value['itemid']]["ignore"]."<br />";
 						if ($moduleArr[$value['itemid']]["ignore"] !== true) {
-							self::$modSlots[$slot][] = array('id' => $moduleArr[$value['itemid']]['id'], 'name' => $moduleArr[$value['itemid']]['name'], 'groupID' => $moduleArr[$value['itemid']]['groupID'], 'icon' => $moduleArr[$value['itemid']]['icon'], 'iconloc' => $moduleArr[$value['itemid']]['iconloc'], 'metaLevel' => $moduleArr[$value['itemid']]["metaLevel"], 'techLevel' => $moduleArr[$value['itemid']]["techLevel"], 'capacity' => $moduleArr[$value['itemid']]['capacity'], 'volume' => $moduleArr[$value['itemid']]['volume'], 'mass' => $moduleArr[$value['itemid']]['mass']);
+
+							self::$modSlots[$slot][] = array(
+								'id' => $moduleArr[$value['itemid']]['id'],
+								'name' => $moduleArr[$value['itemid']]['name'],
+								'groupID' => $moduleArr[$value['itemid']]['groupID'],
+								'icon' => $moduleArr[$value['itemid']]['icon'],
+								'iconloc' => $moduleArr[$value['itemid']]['iconloc'],
+								'metaLevel' => $moduleArr[$value['itemid']]["metaLevel"],
+								'techLevel' => $moduleArr[$value['itemid']]["techLevel"],
+								'capacity' => $moduleArr[$value['itemid']]['capacity'],
+								'volume' => $moduleArr[$value['itemid']]['volume'],
+								'mass' => $moduleArr[$value['itemid']]['mass']
+							);
 
 							$valueinput = explode(",", $moduleArr[$value['itemid']]['value']);
 							$attributeName = explode(",", $moduleArr[$value['itemid']]['attributeName']);
@@ -2335,7 +2342,6 @@ bd($param_moduleArray, '$param_moduleArray');
 							$stackable = explode(",", $moduleArr[$value['itemid']]['stackable']);
 							$unit = explode(",", $moduleArr[$value['itemid']]['unit']);
 
-							//echo $moduleArr[$value['itemid']]['name']." -> <br />";
 							for ($k = 0; $k < count($valueinput); $k++) {
 
 								if ($valueinput != "") {
@@ -2346,10 +2352,9 @@ bd($param_moduleArray, '$param_moduleArray');
 									}
 
 									$neg = fittingTools::negRules($stackable[$k], $unit[$k]);
-									if ($slot == 6) {
+									if ($slot == ShipSlotEnum::DRONEBAY) {
 										fittingTools::applyDroneSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $slot);
 									} else {
-										//echo $moduleArr[$value['itemid']]['name']."<br />";
 										fittingTools::applyShipSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $slot, $moduleArr[$value['itemid']]['mass']);
 									}
 								}
@@ -2369,19 +2374,13 @@ bd($param_moduleArray, '$param_moduleArray');
 						if (fittingTools::advancedModuleSettings($value['name']) == "ab") {
 							self::$shipStats->setIsAB(true);
 						}
-						//self::$modSlots[$j][] = array('id'=> $value['id'],'name'=> $value['name'], 'icon'=> $value['itemid'], 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
-						if ($slot == 10 || $slot == 6) {
+						if ($slot == ShipSlotEnum::AMMO || $slot == ShipSlotEnum::DRONEBAY) {
 							self::$modSlots[$slot][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(32), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
 						} else {
 							self::$modSlots[$slot][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(64, false), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
 						}
-						/*echo "<br/>-----------------------<br/>";
-					echo "<pre>";
-					print_r($value);
-					echo "</pre>";*/
-						//echo "not found -> ".$typeID['typeName']." ".$value['itemid']."<br />";
 
-						if ($slot == 7) {
+						if ($slot == ShipSlotEnum::SUBSYSTEM) {
 							self::$shipStats->setMass(fittingTools::statOntoShip(self::$shipStats->getMass(), fittingTools::calculateMass($value['mass']), "+", "+", 1));
 						}
 
@@ -2410,7 +2409,7 @@ where typeID = " . $value['itemid']);
 
 							$neg = fittingTools::negRules($row['stackable'], $row['unit']);
 							$drone_count = 0;
-							if ($slot == 86) {
+							if ($slot == ShipSlotEnum::DRONEBAY) {
 								//applyDroneSkills
 								//echo fittingTools::dumpDrones($typeID['typeName'])."<br />";
 								if (fittingTools::applyDroneSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], $value['volume'], $value['name'], $value["tech"], 6)) {
@@ -2440,7 +2439,6 @@ where typeID = " . $value['itemid']);
 									$moduleArr[$value['itemid']]['ignore'] = true;
 
 								}
-								$drone_count++;
 
 							} else {
 
@@ -2478,19 +2476,19 @@ where typeID = " . $value['itemid']);
 
 						}
 					}
-					if ($slot != 10) {
+					if ($slot != ShipSlotEnum::AMMO) {
 						self::$moduleCount++;
 					}
 
 					/////////////////////////////////////////
 
-					if ($slot == 1) {
+					if ($slot == ShipSlotEnum::HIGHSLOT) {
 						$hig++;
-					} else if ($slot == 2) {
+					} elseif ($slot == ShipSlotEnum::MIDSLOT) {
 						$mid++;
-					} else if ($slot == 3) {
+					} elseif ($slot == ShipSlotEnum::LOWSLOT) {
 						$low++;
-					} else if ($slot == 5) {
+					} elseif ($slot == ShipSlotEnum::RIGSLOT) {
 						$rig++;
 					}
 
