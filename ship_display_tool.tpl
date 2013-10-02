@@ -128,7 +128,7 @@
 
 						<ul id="km_posting">
 							<li>API: <span>{if $extid != 0}Yes{else}No{/if}</span></li>
-							<li>Source: <span>{if $type == "API"}API{else if $type == "IP"}Manual{else if $type == "URL"}Fetch{/if}</span></li>
+							<li>Source: <span>{if $type == "API"}API{elseif $type == "IP"}Manual{elseif $type == "URL"}Fetch{/if}</span></li>
 							<li>Damage: <span>{$getPilotDam}</span></li>
 							<li>Cost: <span>{$getPilotCos} isk</span></li>
 						</ul>
@@ -205,21 +205,21 @@
 					<ul id="capContainer">
 						{if $capAmountMperc > 0 && $capAmountMperc <= 10}
 							<li class="cap_left" id="cap10"></li>
-						{else if $capAmountMperc > 10 && $capAmountMperc <= 20}
+						{elseif $capAmountMperc > 10 && $capAmountMperc <= 20}
 							<li class="cap_left" id="cap20"></li>
-						{else if $capAmountMperc > 20 && $capAmountMperc <= 30}
+						{elseif $capAmountMperc > 20 && $capAmountMperc <= 30}
 							<li class="cap_left" id="cap30"></li>
-						{else if $capAmountMperc > 30 && $capAmountMperc <= 40}
+						{elseif $capAmountMperc > 30 && $capAmountMperc <= 40}
 							<li class="cap_left" id="cap40"></li>
-						{else if $capAmountMperc > 40 && $capAmountMperc <= 50}
+						{elseif $capAmountMperc > 40 && $capAmountMperc <= 50}
 							<li class="cap_left" id="cap50"></li>
-						{else if $capAmountMperc > 50 && $capAmountMperc <= 60}
+						{elseif $capAmountMperc > 50 && $capAmountMperc <= 60}
 							<li class="cap_left" id="cap60"></li>
-						{else if $capAmountMperc > 60 && $capAmountMperc <= 70}
+						{elseif $capAmountMperc > 60 && $capAmountMperc <= 70}
 							<li class="cap_left" id="cap70"></li>
-						{else if $capAmountMperc > 70 && $capAmountMperc <= 80}
+						{elseif $capAmountMperc > 70 && $capAmountMperc <= 80}
 							<li class="cap_left" id="cap80"></li>
-						{else if $capAmountMperc > 80 && $capAmountMperc <= 90}
+						{elseif $capAmountMperc > 80 && $capAmountMperc <= 90}
 							<li class="cap_left" id="cap90"></li>
 						{else}
 							<li class="cap_left" id="cap100"></li>
