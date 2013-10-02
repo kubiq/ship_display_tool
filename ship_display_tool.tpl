@@ -13,7 +13,6 @@
 					<div class="shipview">
 						<img src='http://image.eveonline.com/Render/{$getShipIcon}_512.png' alt='' id='shipImg'/>
 
-
 						<canvas id="shipCover" width="430" height="426"></canvas>
 						<canvas id="shipcpu" width="72" height="152"></canvas>
 						<canvas id="shipprg" width="152" height="72"></canvas>

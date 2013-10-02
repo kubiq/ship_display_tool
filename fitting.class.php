@@ -247,13 +247,14 @@ where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeN
 							if (($temp["usedgroupID"] == $group)) {
 								$fitting_array[ShipSlotEnum::AMMO][] = array(
 									'name' => $temp['name'],
+									'groupID' => $temp['groupID'],
 									'itemid' => $temp['itemid'],
 									'id' => $temp['id'],
 									'capacity' => $temp['capacity'],
 									'mass' => $temp['mass'],
 									'volume' => $temp['volume'],
 									'icon' => $temp['icon'],
-									'slot' => $temp['itt_slot'],
+									'slot' => isset($temp['itt_slot']) ? $temp['itt_slot'] : 0,
 									'meta' => $temp['meta'],
 									'tech' => $temp['tech']
 								);

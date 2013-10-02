@@ -771,16 +771,17 @@ where typeID = " . $typeID['typeID']);
 	}
 
 	static function calculateMass($param_mass) {
-
-		//1.482e+07
-		$break = explode("e+", $param_mass);
-		$exp = 1;
-		for ($e = 0; $e < $break[1]; $e++) {
-			$exp = $exp * 10;
-		}
+//
+//		//1.482e+07
+//		$break = explode("e+", $param_mass);
+//		dump($break);
+//		$exp = 1;
+//		for ($e = 0; $e < $break[1]; $e++) {
+//			$exp = $exp * 10;
+//		}
 
 		//echo $break[0]." ".($break[1]*10)." ".$exp;
-		return ($break[0] * $exp);
+		return $param_mass;
 	}
 
 	static function setlevel5Skills() {
@@ -1153,6 +1154,7 @@ where typeID = " . $typeID['typeID']);
 
 	static function boostDuration($type) {
 
+		$total = 0;
 		$j = 0;
 		if (self::$shipStats->getTankBoost()) {
 			foreach (self::$shipStats->getTankBoost() as $i => $value) {
@@ -1166,9 +1168,11 @@ where typeID = " . $typeID['typeID']);
 					} else if ($type == "shield") {
 						$dur = fittingTools::shieldAmpDur($dur);
 						$dur = fittingTools::getSkillset("shield booster", "duration", $dur);
-
-						if ($value['icon'] == "105_4") {
+			// TODO spatne
+						if ($value['icon'] == "105_4") { // ancilary boostery
+							if (isset($value['amount'])) { // jneom pokud je naplneney
 							$total += 60 / ($dur + $value['amount']);
+							}
 						} else {
 							$total += $dur;
 						}
@@ -1585,30 +1589,19 @@ where typeID = " . $typeID['typeID']);
 		if ($arr) {
 			foreach ($arr as $i => $value) {
 
-				/*if($value['name'] == $condition) {
-
-				$i++;
-			} else {
-				$i = 0;
-				$condition = $value['name'];
-
-
-				$i++;
-			}*/
-
-				if ($value['rofP']) {
+				if (isset($value['rofP'])) {
 					$dex = "P";
 					$reload = 10;
-				} else if ($value['rofL']) {
+				} elseif (isset($value['rofL'])) {
 					$dex = "L";
 					$reload = 0;
-				} else if ($value['rofH']) {
+				} elseif (isset($value['rofH'])) {
 					$dex = "H";
 					$reload = 10;
-				} else if ($value['rofM']) {
+				} elseif (isset($value['rofM'])) {
 					$dex = "M";
 					$reload = 10;
-				} else if ($value['rof']) {
+				} elseif (isset($value['rof'])) {
 					$dex = "";
 					$reload = 0;
 				}
@@ -1651,26 +1644,21 @@ where typeID = " . $typeID['typeID']);
 
 		foreach (self::$shipStats->getDamageGun() as $i => $value) {
 
-			if ($value['rofP']) {
+			if (isset($value['rofP'])) {
 				$dex = "P";
-			} else if ($value['rofL']) {
+			} elseif (isset($value['rofL'])) {
 				$dex = "L";
-			} else if ($value['rofH']) {
+			} elseif (isset($value['rofH'])) {
 				$dex = "H";
-			} else if ($value['rofM']) {
+			} elseif (isset($value['rofM'])) {
 				$dex = "M";
-			} else if ($value['rof']) {
+			} elseif (isset($value['rof'])) {
 				$dex = "";
 			}
-
-			/*echo "<pre>";
-		print_r($value);
-		echo "</pre>";*/
 
 			if ($dex != "M") {
 				$rof = fittingTools::setDamageModSkills("rof" . $dex, $value['rof' . $dex], $value['techlevel']);
 				$dMod = fittingTools::setDamageModSkills("damage" . $dex, $value['damage' . $dex], $value['techlevel']);
-				//echo $rof." - ".$dMod;
 
 				$em = $value['emDamage'];
 				$ex = $value['exDamage'];
@@ -1748,10 +1736,7 @@ where typeID = " . $typeID['typeID']);
 					}
 
 				}
-				/*echo $dMod." - ".$rof."<br />";
-			echo "<pre>";
-			print_r(self::$shipStats->getDamageModules());
-			echo "</pre>";*/
+
 				if (self::$shipStats->getDamageModules()) {
 					foreach (self::$shipStats->getDamageModules() as $j => $damMod) {
 						if ($damMod['damage' . $dex]) {
@@ -1762,7 +1747,7 @@ where typeID = " . $typeID['typeID']);
 						}
 					}
 				}
-				//echo $dMod." - ".$rof."<br />";
+
 			} else {
 				$rof = fittingTools::setDamageModSkills("rof" . $dex, $value['rof' . $dex], $value['techlevel']);
 				$dMod = 1;
@@ -1861,7 +1846,7 @@ where typeID = " . $typeID['typeID']);
 			$arr[$i]['kiDamage'] = $ki;
 			$arr[$i]['thDamage'] = $th;
 			$arr[$i]['ammoCap'] = $value['ammoCap'];
-			if ($value['capNeed']) {
+			if (isset($value['capNeed']) && $value['capNeed']) {
 				$arr[$i]['capNeed'] = $cap;
 				$arr[$i]['use'] = $cap / $rof;
 			}
@@ -1869,9 +1854,6 @@ where typeID = " . $typeID['typeID']);
 			$dex = "";
 		}
 
-		/*echo "<pre>";
-	print_r($arr);
-	echo "</pre>";*/
 
 		return $arr;
 	}
@@ -1947,20 +1929,24 @@ where typeID = " . $typeID['typeID']);
 
 		$total = 0;
 		if (self::$shipStats->getCapGJ()) {
-			foreach (self::$shipStats->getCapGJ() as $i => $value) {
-				$total += $value['use'];
-				//echo "".$total."<br />";
+			foreach (self::$shipStats->getCapGJ() as $value) {
+				if (isset($value['use'])) {
+					$total += $value['use'];
+				}
 			}
 		}
 		if (self::$shipStats->getTransCap()) {
-			foreach (self::$shipStats->getTransCap() as $i => $value) {
-				$total += $value['use'];
+			foreach (self::$shipStats->getTransCap() as $value) {
+				if (isset($value['use'])) {
+					$total += $value['use'];
+				}
 			}
 		}
 		if (self::$shipStats->getDamageGun()) {
-			foreach (self::$shipStats->getDamageGun() as $i => $value) {
-				$total += $value['use'];
-				//echo "".$total."<br />";
+			foreach (self::$shipStats->getDamageGun() as $value) {
+				if (isset($value['use'])) {
+					$total += $value['use'];
+				}
 			}
 		}
 
@@ -1972,15 +1958,17 @@ where typeID = " . $typeID['typeID']);
 
 		$total = 0;
 		if (self::$shipStats->getCapInj()) {
-			foreach (self::$shipStats->getCapInj() as $i => $value) {
-				$total += $value['use'];
+			foreach (self::$shipStats->getCapInj() as $value) {
+				if (isset($value['use'])) {
+					$total += $value['use'];
+				}
 			}
 		}
 
 		//any nos effects
 		if (self::$shipStats->getCapGJ()) {
-			foreach (self::$shipStats->getCapGJ() as $i => $value) {
-				if ($value['capAdd']) {
+			foreach (self::$shipStats->getCapGJ() as $value) {
+				if (isset($value['capAdd'])) {
 					$total += $value['capAdd'];
 				}
 			}
@@ -1991,12 +1979,8 @@ where typeID = " . $typeID['typeID']);
 
 	static function capacitorInjector() {
 
-		//print_r(self::$shipStats->getCapInj());
-
+		$arr = [];
 		foreach (self::$shipStats->getCapInj() as $i => $value) {
-			//echo $value['duration']." ".$value['capacity']." ".$value['amount']." ".$value['vol']."<br />";
-
-			//echo fittingTools::capInjector($value['amount'], $value['capacity'], $value['vol'], $value['duration']);
 
 			$arr[$i]['duration'] = $value['duration'];
 			$arr[$i]['capacity'] = $value['capacity'];
@@ -2006,7 +1990,6 @@ where typeID = " . $typeID['typeID']);
 
 				$arr[$i]['amount'] = $arrWithBooster['amount'];
 				$arr[$i]['vol'] = $arrWithBooster['vol'];
-				//echo "here";
 				$arr[$i]['use'] = fittingTools::capInjector($arrWithBooster['amount'], $value['capacity'], $arrWithBooster['vol'], $value['duration']);
 			} else {
 				$arr[$i]['amount'] = $value['amount'];
@@ -2021,6 +2004,7 @@ where typeID = " . $typeID['typeID']);
 
 	static function capInjEmpty($modCap) {
 
+		$arr = [];
 		if ($modCap == "160") {
 			$arr['amount'] = "800";
 			$arr['vol'] = "32";
@@ -2041,23 +2025,23 @@ where typeID = " . $typeID['typeID']);
 	static function capacitorUsage() {
 
 		foreach (self::$shipStats->getCapGJ() as $i => $value) {
-			$dur = fittingTools::getSkillset($value['name'], "duration", $value['duration']);
-			$cap = fittingTools::getSkillset($value['name'], "capNeeded", $value['capNeeded']);
+			$dur = fittingTools::getSkillset($value['name'], "duration", isset($value['duration']) ? $value['duration'] : 0);
+			$cap = fittingTools::getSkillset($value['name'], "capNeeded", isset($value['capNeeded']) ? $value['capNeeded'] : 0);
 
-			if ($value['react']) {
+			if (isset($value['react'])) {
 				$rea = fittingTools::getSkillset($value['name'], "react", $value['react']);
 				$dur = $dur + $rea;
 			}
 
 			$arr[$i]['name'] = $value['name'];
-			if ($value['capNeededBonus']) {
+			if (isset($value['capNeededBonus'])) {
 				$arr[$i]['capNeeded'] = $cap - (($cap / 100) * $value['capNeededBonus']);
 				$cap = $cap - (($cap / 100) * $value['capNeededBonus']);
 			} else {
 				$arr[$i]['capNeeded'] = $cap;
 			}
 
-			if ($value['capNeededBonus']) {
+			if (isset($value['capNeededBonus'])) {
 				$arr[$i]['duration'] = $dur - (($dur / 100) * $value['durationBonus']);
 				$dur = $dur - (($dur / 100) * $value['durationBonus']);
 			} else {
@@ -2070,7 +2054,7 @@ where typeID = " . $typeID['typeID']);
 				$arr[$i]['use'] = ($cap / $dur);
 			}
 
-			if ($value['capAdd']) {
+			if (isset($value['capAdd'])) {
 				$arr[$i]['capAdd'] = $value['capAdd'] / $dur;
 			}
 
@@ -2375,9 +2359,31 @@ bd($param_moduleArray, '$param_moduleArray');
 							self::$shipStats->setIsAB(true);
 						}
 						if ($slot == ShipSlotEnum::AMMO || $slot == ShipSlotEnum::DRONEBAY) {
-							self::$modSlots[$slot][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(32), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
+							self::$modSlots[$slot][] = array(
+								'id' => $value['id'],
+								'name' => $value['name'],
+								'groupID' => $value['groupID'],
+								'icon' => $value['icon'],
+								'iconloc' => $item->getIcon(32),
+								'metaLevel' => $value["meta"],
+								'techLevel' => $value["tech"],
+								'capacity' => $value["capacity"],
+								'volume' => $value["volume"],
+								'mass' => $value["mass"]
+							);
 						} else {
-							self::$modSlots[$slot][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(64, false), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
+							self::$modSlots[$slot][] = array(
+								'id' => $value['id'],
+								'name' => $value['name'],
+								'groupID' => $value['groupID'],
+								'icon' => $value['icon'],
+								'iconloc' => $item->getIcon(64, false),
+								'metaLevel' => $value["meta"],
+								'techLevel' => $value["tech"],
+								'capacity' => $value["capacity"],
+								'volume' => $value["volume"],
+								'mass' => $value["mass"]
+							);
 						}
 
 						if ($slot == ShipSlotEnum::SUBSYSTEM) {
@@ -2430,6 +2436,7 @@ where typeID = " . $value['itemid']);
 									$moduleArr[$value['itemid']]['capacity'] = $value['capacity'];
 									$moduleArr[$value['itemid']]['volume'] = $value['volume'];
 									$moduleArr[$value['itemid']]['mass'] = $value['mass'];
+									$moduleArr[$value['itemid']]['ignore'] = false;
 
 									self::$droneArr[$value['itemid']]['name'] = $value['name'];
 									self::$droneArr[$value['itemid']]['count'] = 1;
@@ -2441,8 +2448,18 @@ where typeID = " . $value['itemid']);
 								}
 
 							} else {
+								if (!isset($value['groupID'])) dump($value);
+								if (fittingTools::applyShipSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], (($slot == ShipSlotEnum::AMMO) ? $value['volume'] : $value['capacity']), $value['name'], $value["tech"], $slot, $value['mass'])) {
 
-								if (fittingTools::applyShipSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], (($slot == 10) ? $value['volume'] : $value['capacity']), $value['name'], $value["tech"], $slot, $value['mass'])) {
+									 if (!isset($moduleArr[$value['itemid']])) {
+										 $moduleArr[$value['itemid']] = [
+											 'value' => '',
+											 'attributeName' => '',
+											 'displayName' => '',
+											 'stackable' => '',
+											 'unit' => '',
+										 ];
+									 }
 
 									$moduleArr[$value['itemid']]['value'] .= $row['value'] . ",";
 									$moduleArr[$value['itemid']]['attributeName'] .= $row['attributeName'] . ",";
@@ -2455,19 +2472,16 @@ where typeID = " . $value['itemid']);
 									$moduleArr[$value['itemid']]['groupID'] = $value['groupID'];
 									$moduleArr[$value['itemid']]['techLevel'] = $value['tech'];
 									$moduleArr[$value['itemid']]['metaLevel'] = $value['meta'];
-
 									$moduleArr[$value['itemid']]['icon'] = $value['icon'];
+									$moduleArr[$value['itemid']]['ignore'] = false;
 
-									if ($slot == 10 || $slot == 6) {
+									if ($slot == ShipSlotEnum::AMMO || $slot == ShipSlotEnum::DRONEBAY) {
 										$moduleArr[$value['itemid']]['iconloc'] = $item->getIcon(32);
-										//echo "10 ".$moduleArr[$value['itemid']]['icon']."<br />";
 									} else {
-										//$moduleArr[$value['itemid']]['icon'] 		= $value['icon'];
 										$moduleArr[$value['itemid']]['iconloc'] = $item->getIcon(64, false);
-										//echo $moduleArr[$value['itemid']]['icon']."<br />";
 									}
 
-									$moduleArr[$value['itemid']]['capacity'] = (($slot == 10) ? $value['volume'] : $value['capacity']);
+									$moduleArr[$value['itemid']]['capacity'] = (($slot == ShipSlotEnum::AMMO) ? $value['volume'] : $value['capacity']);
 									$moduleArr[$value['itemid']]['volume'] = $value['volume'];
 									$moduleArr[$value['itemid']]['mass'] = $value['mass'];
 								}
@@ -2770,6 +2784,7 @@ bd($moduleArr, 'modulearr');
 
 	static function getNumberBack($str) {
 
+		$num = null;
 		$break = explode(" and ", $str);
 		$i = 0;
 		foreach ($break as $value) {
@@ -2902,22 +2917,18 @@ bd($moduleArr, 'modulearr');
 
 	}
 
-	static function applyShipSkills($bonus, $type, $mode, $effect, $shipEff, $skillBonus, $negEffect, $groupID, $capacity, $modName, $techLevel, $moduleLevel, $mass) {
+	static function applyShipSkills($bonus, $type, $mode, $effect, $shipEff, $skillBonus, $negEffect, $groupID, $capacity, $modName, $techLevel, $moduleSlot, $mass) {
 
 		fittingTools::setTank($modName);
 
-		//echo $modName." -> ".$bonus." -> ".$effect." I ".$groupID."<br />";
-
-		//echo $icon."<br />";
-
 		//ordering
-		if ($moduleLevel == 5) { //rig
+		if ($moduleSlot == ShipSlotEnum::RIGSLOT) { //rig
 			$slotOrder = 2;
-		} else if ($moduleLevel == 2) { //mid
+		} else if ($moduleSlot == ShipSlotEnum::MIDSLOT) { //mid
 			$slotOrder = 4;
-		} else if ($moduleLevel == 3) { //low
+		} else if ($moduleSlot == ShipSlotEnum::LOWSLOT) { //low
 			$slotOrder = 3;
-		} else if ($moduleLevel == 4) { //sub
+		} else if ($moduleSlot == ShipSlotEnum::SUBSYSTEM) { //sub
 			$slotOrder = 1;
 		}
 
@@ -2933,7 +2944,7 @@ bd($moduleArr, 'modulearr');
 				$bonus = 0;
 			}
 			if ($bonus != 0) {
-				if ($groupID == "137" || $groupID == "766") {
+				if ($groupID == 137 || $groupID == 766) {
 					if (!fittingTools::isReactor($modName)) {
 						$bonus = ($bonus - 1) * 100;
 						self::$shipStats->setShieldAmount(fittingTools::statOntoShip(self::$shipStats->getShieldAmount(), $bonus, $type, $mode, $negEffect));
@@ -2946,13 +2957,11 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 		if (strtolower($effect) == "armorhp" || strtolower($effect) == "armorhpbonusadd" || strtolower($effect) == "armorhpbonus") {
-			//self::$shipStats->setArmorAmount($row['value']);
 			self::$shipStats->setArmorAmount(fittingTools::statOntoShip(self::$shipStats->getArmorAmount(), $bonus, $type, $mode, $negEffect));
 
 			return true;
 		}
 		if (strtolower($effect) == "structurehpmultiplier") {
-			//self::$shipStats->setHullAmount($row['value']);
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
@@ -2964,25 +2973,25 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "scanradarstrength" && $bonus > 0 && $moduleLevel == 7) {
+		if (strtolower($effect) == "scanradarstrength" && $bonus > 0 && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			self::$shipStats->setSensorType(fittingTools::getSensorTypeImg('radar'));
 			self::$shipStats->setSensorAmount($bonus);
 
 			return true;
 		}
-		if (strtolower($effect) == "scanladarstrength" && $bonus > 0 && $moduleLevel == 7) {
+		if (strtolower($effect) == "scanladarstrength" && $bonus > 0 && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			self::$shipStats->setSensorType(fittingTools::getSensorTypeImg('ladar'));
 			self::$shipStats->setSensorAmount($bonus);
 
 			return true;
 		}
-		if (strtolower($effect) == "scanmagnetometricstrength" && $bonus > 0 && $moduleLevel == 7) {
+		if (strtolower($effect) == "scanmagnetometricstrength" && $bonus > 0 && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			self::$shipStats->setSensorType(fittingTools::getSensorTypeImg('magnetometric'));
 			self::$shipStats->setSensorAmount($bonus);
 
 			return true;
 		}
-		if (strtolower($effect) == "scangravimetricstrength" && $bonus > 0 && $moduleLevel == 7) {
+		if (strtolower($effect) == "scangravimetricstrength" && $bonus > 0 && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			self::$shipStats->setSensorType(fittingTools::getSensorTypeImg('gravimetric'));
 			self::$shipStats->setSensorAmount($bonus);
 
@@ -2995,10 +3004,9 @@ bd($moduleArr, 'modulearr');
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			//echo $negEffect."<br />";
 			if (!$negEffect && $groupID != "60") {
 
-				if ($groupID == "98" || $groupID == "328" || $groupID == "326" || $groupID == "773") {
+				if ($groupID == 98 || $groupID == 328 || $groupID == 326 || $groupID == 773) {
 					if (strstr(strtolower($modName), "hardener")) {
 						$emBonus = $bonus;
 						$order = 1;
@@ -3015,22 +3023,19 @@ bd($moduleArr, 'modulearr');
 					) {
 						$emBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
 						$order = 1;
-					} else if ($groupID == "773") {
+					} else if ($groupID == 773) {
 						$emBonus = $bonus;
 						$order = 1;
 					} else {
 						$emBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
 
-						if ($groupID == "98") {
+						if ($groupID == 98) {
 							$order = 5;
-						} else if ($groupID == "326") {
+						} else if ($groupID == 326) {
 							$order = 2;
 						}
 
 					}
-					//echo $modName." : ".$bonus." : ".self::$shipStats->getArmorEM()." : ".$emBonus." : ";
-					//self::$shipStats->setArmorEM(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorEM(), $emBonus, $type, self::$emArmor));
-					//echo self::$shipStats->getArmorEM()."<br />";
 
 					if ($bonus != 0) {
 						$arr = self::$shipStats->getShipResists();
@@ -3039,20 +3044,16 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "em";
 						$arr[self::$shieldResistPos]['amount'] = $emBonus;
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
 					}
-					//self::$emArmor++;
 				} else {
-					//self::$shipStats->setShieldEM(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldEM(), ($bonus*$skillBonus), $type, self::$emShield));
-					//self::$emShield++;
 
-					if ($groupID == "77") {
+					if ($groupID == 77) {
 						$order = 2;
 						$emBonus = $bonus;
-					} else if ($groupID == "774") {
+					} else if ($groupID == 774) {
 						$emBonus = $bonus;
 						$order = 2;
 					} else {
@@ -3067,7 +3068,6 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "em";
 						$arr[self::$shieldResistPos]['amount'] = ($emBonus * $skillBonus);
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
@@ -3082,18 +3082,16 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "em";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
 				}
-				//self::$shipStats->setShieldEM(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldEM(), ($bonus*$skillBonus), $type, 1));
 			}
 
 			return true;
 		}
 
-		if (strtolower($effect) == "passivearmoremdamageresonance" && $moduleLevel == 7) {
+		if (strtolower($effect) == "passivearmoremdamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			if ($bonus < 1 && $bonus != 0) {
 				$bonus = (1 - $bonus) * 100;
 			}
@@ -3101,6 +3099,82 @@ bd($moduleArr, 'modulearr');
 				$arr = self::$shipStats->getShipResists();
 				$arr[self::$shieldResistPos]['name'] = $modName;
 				$arr[self::$shieldResistPos]['section'] = "armor";
+				$arr[self::$shieldResistPos]['resist'] = "em";
+				$arr[self::$shieldResistPos]['amount'] = $bonus;
+				$arr[self::$shieldResistPos]['type'] = $type;
+				$arr[self::$shieldResistPos]['order'] = 4;
+				self::$shipStats->setShipResists($arr);
+				self::$shieldResistPos++;
+			}
+
+			return true;
+		}
+
+		if (strtolower($effect) == "passivearmorthermaldamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
+			if ($bonus < 1 && $bonus != 0) {
+				$bonus = (1 - $bonus) * 100;
+			}
+			if ($bonus != 0) {
+				$arr = self::$shipStats->getShipResists();
+				$arr[self::$shieldResistPos]['name'] = $modName;
+				$arr[self::$shieldResistPos]['section'] = "armor";
+				$arr[self::$shieldResistPos]['resist'] = "th";
+				$arr[self::$shieldResistPos]['amount'] = $bonus;
+				$arr[self::$shieldResistPos]['type'] = $type;
+				$arr[self::$shieldResistPos]['order'] = 4;
+				self::$shipStats->setShipResists($arr);
+				self::$shieldResistPos++;
+			}
+
+			return true;
+		}
+
+		if (strtolower($effect) == "passivearmorkineticdamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
+			if ($bonus < 1 && $bonus != 0) {
+				$bonus = (1 - $bonus) * 100;
+			}
+			if ($bonus != 0) {
+				$arr = self::$shipStats->getShipResists();
+				$arr[self::$shieldResistPos]['name'] = $modName;
+				$arr[self::$shieldResistPos]['section'] = "armor";
+				$arr[self::$shieldResistPos]['resist'] = "ki";
+				$arr[self::$shieldResistPos]['amount'] = $bonus;
+				$arr[self::$shieldResistPos]['type'] = $type;
+				$arr[self::$shieldResistPos]['order'] = 4;
+				self::$shipStats->setShipResists($arr);
+				self::$shieldResistPos++;
+			}
+
+			return true;
+		}
+
+		if (strtolower($effect) == "passivearmorexplosivedamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
+			if ($bonus < 1 && $bonus != 0) {
+				$bonus = (1 - $bonus) * 100;
+			}
+			if ($bonus != 0) {
+				$arr = self::$shipStats->getShipResists();
+				$arr[self::$shieldResistPos]['name'] = $modName;
+				$arr[self::$shieldResistPos]['section'] = "armor";
+				$arr[self::$shieldResistPos]['resist'] = "ex";
+				$arr[self::$shieldResistPos]['amount'] = $bonus;
+				$arr[self::$shieldResistPos]['type'] = $type;
+				$arr[self::$shieldResistPos]['order'] = 4;
+				self::$shipStats->setShipResists($arr);
+				self::$shieldResistPos++;
+			}
+
+			return true;
+		}
+
+		if (strtolower($effect) == "passiveshieldemdamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
+			if ($bonus < 1 && $bonus != 0) {
+				$bonus = (1 - $bonus) * 100;
+			}
+			if ($bonus != 0) {
+				$arr = self::$shipStats->getShipResists();
+				$arr[self::$shieldResistPos]['name'] = $modName;
+				$arr[self::$shieldResistPos]['section'] = "shield";
 				$arr[self::$shieldResistPos]['resist'] = "em";
 				$arr[self::$shieldResistPos]['amount'] = $bonus;
 				$arr[self::$shieldResistPos]['type'] = $type;
@@ -3113,87 +3187,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "passivearmorthermaldamageresonance" && $moduleLevel == 7) {
-			if ($bonus < 1 && $bonus != 0) {
-				$bonus = (1 - $bonus) * 100;
-			}
-			if ($bonus != 0) {
-				$arr = self::$shipStats->getShipResists();
-				$arr[self::$shieldResistPos]['name'] = $modName;
-				$arr[self::$shieldResistPos]['section'] = "armor";
-				$arr[self::$shieldResistPos]['resist'] = "th";
-				$arr[self::$shieldResistPos]['amount'] = $bonus;
-				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
-				$arr[self::$shieldResistPos]['order'] = 4;
-				self::$shipStats->setShipResists($arr);
-				self::$shieldResistPos++;
-			}
-
-			return true;
-		}
-
-		if (strtolower($effect) == "passivearmorkineticdamageresonance" && $moduleLevel == 7) {
-			if ($bonus < 1 && $bonus != 0) {
-				$bonus = (1 - $bonus) * 100;
-			}
-			if ($bonus != 0) {
-				$arr = self::$shipStats->getShipResists();
-				$arr[self::$shieldResistPos]['name'] = $modName;
-				$arr[self::$shieldResistPos]['section'] = "armor";
-				$arr[self::$shieldResistPos]['resist'] = "ki";
-				$arr[self::$shieldResistPos]['amount'] = $bonus;
-				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
-				$arr[self::$shieldResistPos]['order'] = 4;
-				self::$shipStats->setShipResists($arr);
-				self::$shieldResistPos++;
-			}
-
-			return true;
-		}
-
-		if (strtolower($effect) == "passivearmorexplosivedamageresonance" && $moduleLevel == 7) {
-			if ($bonus < 1 && $bonus != 0) {
-				$bonus = (1 - $bonus) * 100;
-			}
-			if ($bonus != 0) {
-				$arr = self::$shipStats->getShipResists();
-				$arr[self::$shieldResistPos]['name'] = $modName;
-				$arr[self::$shieldResistPos]['section'] = "armor";
-				$arr[self::$shieldResistPos]['resist'] = "ex";
-				$arr[self::$shieldResistPos]['amount'] = $bonus;
-				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
-				$arr[self::$shieldResistPos]['order'] = 4;
-				self::$shipStats->setShipResists($arr);
-				self::$shieldResistPos++;
-			}
-
-			return true;
-		}
-
-		if (strtolower($effect) == "passiveshieldemdamageresonance" && $moduleLevel == 7) {
-			if ($bonus < 1 && $bonus != 0) {
-				$bonus = (1 - $bonus) * 100;
-			}
-			if ($bonus != 0) {
-				$arr = self::$shipStats->getShipResists();
-				$arr[self::$shieldResistPos]['name'] = $modName;
-				$arr[self::$shieldResistPos]['section'] = "shield";
-				$arr[self::$shieldResistPos]['resist'] = "em";
-				$arr[self::$shieldResistPos]['amount'] = $bonus;
-				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
-				$arr[self::$shieldResistPos]['order'] = 4;
-				self::$shipStats->setShipResists($arr);
-				self::$shieldResistPos++;
-			}
-
-			return true;
-		}
-
-		if (strtolower($effect) == "passiveshieldthermaldamageresonance" && $moduleLevel == 7) {
+		if (strtolower($effect) == "passiveshieldthermaldamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			if ($bonus < 1 && $bonus != 0) {
 				$bonus = (1 - $bonus) * 100;
 			}
@@ -3213,7 +3207,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "passiveshieldkineticdamageresonance" && $moduleLevel == 7) {
+		if (strtolower($effect) == "passiveshieldkineticdamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			if ($bonus < 1 && $bonus != 0) {
 				$bonus = (1 - $bonus) * 100;
 			}
@@ -3224,7 +3218,6 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$shieldResistPos]['resist'] = "ki";
 				$arr[self::$shieldResistPos]['amount'] = $bonus;
 				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
 				$arr[self::$shieldResistPos]['order'] = 4;
 				self::$shipStats->setShipResists($arr);
 				self::$shieldResistPos++;
@@ -3233,7 +3226,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "passiveshieldexplosivedamageresonance" && $moduleLevel == 7) {
+		if (strtolower($effect) == "passiveshieldexplosivedamageresonance" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			if ($bonus < 1 && $bonus != 0) {
 				$bonus = (1 - $bonus) * 100;
 			}
@@ -3244,7 +3237,6 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$shieldResistPos]['resist'] = "ex";
 				$arr[self::$shieldResistPos]['amount'] = $bonus;
 				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$emArmor;
 				$arr[self::$shieldResistPos]['order'] = 4;
 				self::$shipStats->setShipResists($arr);
 				self::$shieldResistPos++;
@@ -3259,7 +3251,7 @@ bd($moduleArr, 'modulearr');
 			}
 			if (!$negEffect && $groupID != "60") {
 
-				if ($groupID == "98" || $groupID == "328" || $groupID == "326" || $groupID == "773") {
+				if ($groupID == 98 || $groupID == 328 || $groupID == 326 || $groupID == 773) {
 					if (strstr(strtolower($modName), "hardener")) {
 						$thBonus = $bonus;
 						$order = 1;
@@ -3276,17 +3268,16 @@ bd($moduleArr, 'modulearr');
 					) {
 						$thBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
 						$order = 1;
-					} else if ($groupID == "773") {
+					} else if ($groupID == 773) {
 						$thBonus = $bonus;
 						$order = 1;
 					} else {
 						$thBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
-						if ($groupID == "98") {
+						if ($groupID == 98) {
 							$order = 5;
 						} else {
 							$order = 2;
 						}
-						//$order = 2;
 					}
 
 					if ($bonus != 0) {
@@ -3301,16 +3292,12 @@ bd($moduleArr, 'modulearr');
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
 					}
-					//self::$shipStats->setArmorTh(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorTh(), $thBonus, $type, self::$thArmor));
-					//self::$thArmor++;
 				} else {
-					//self::$shipStats->setShieldTh(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldTh(), ($bonus*$skillBonus), $type, self::$thShield));
-					//self::$thShield++;
 
-					if ($groupID == "77") {
+					if ($groupID == 77) {
 						$thBonus = $bonus;
 						$order = 2;
-					} else if ($groupID == "774") {
+					} else if ($groupID == 774) {
 						$thBonus = $bonus;
 						$order = 2;
 					} else {
@@ -3325,7 +3312,6 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "th";
 						$arr[self::$shieldResistPos]['amount'] = ($thBonus * $skillBonus);
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$thArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
@@ -3340,12 +3326,10 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "th";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$thArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
 				}
-				//self::$shipStats->setShieldTh(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldTh(), ($bonus*$skillBonus), $type, 1));
 			}
 
 			return true;
@@ -3356,7 +3340,7 @@ bd($moduleArr, 'modulearr');
 			}
 			if (!$negEffect && $groupID != "60") {
 				//
-				if ($groupID == "98" || $groupID == "328" || $groupID == "326" || $groupID == "773") {
+				if ($groupID == 98 || $groupID == 328 || $groupID == 326 || $groupID == 773) {
 					if (strstr(strtolower($modName), "hardener")) {
 						$kiBonus = $bonus;
 						$order = 1;
@@ -3373,22 +3357,17 @@ bd($moduleArr, 'modulearr');
 					) {
 						$kiBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
 						$order = 1;
-					} else if ($groupID == "773") {
+					} else if ($groupID == 773) {
 						$kiBonus = $bonus;
 						$order = 1;
 					} else {
 						$kiBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
-						//$order = 2;
-						if ($groupID == "98") {
+						if ($groupID == 98) {
 							$order = 5;
-						} else if ($groupID == "326") {
+						} else if ($groupID == 326) {
 							$order = 2;
 						}
 					}
-
-					//echo self::$shipStats->getArmorKi()." ";
-					//self::$shipStats->setArmorKi(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorKi(), $kiBonus, $type, self::$kiArmor));
-					//echo $kiBonus." ".self::$shipStats->getArmorKi()."<br />";
 
 					if ($bonus != 0) {
 						$arr = self::$shipStats->getShipResists();
@@ -3397,20 +3376,16 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "ki";
 						$arr[self::$shieldResistPos]['amount'] = $kiBonus;
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
 					}
-					//self::$kiArmor++;
 				} else {
-					//self::$shipStats->setShieldKi(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldKi(), ($bonus*$skillBonus), $type, self::$kiShield));
-					//self::$kiShield++;
 
-					if ($groupID == "77") {
+					if ($groupID == 77) {
 						$order = 2;
 						$kiBonus = $bonus;
-					} else if ($groupID == "774") {
+					} else if ($groupID == 774) {
 						$kiBonus = $bonus;
 						$order = 2;
 					} else {
@@ -3425,7 +3400,6 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "ki";
 						$arr[self::$shieldResistPos]['amount'] = ($kiBonus * $skillBonus);
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
@@ -3433,7 +3407,6 @@ bd($moduleArr, 'modulearr');
 				}
 
 			} else {
-				//self::$shipStats->setShieldKi(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldKi(), ($bonus*$skillBonus), $type, 1));
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
 					$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3441,7 +3414,6 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "ki";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
@@ -3456,7 +3428,7 @@ bd($moduleArr, 'modulearr');
 			}
 			if (!$negEffect && $groupID != "60") {
 
-				if ($groupID == "98" || $groupID == "328" || $groupID == "326" || $groupID == "773") {
+				if ($groupID == 98 || $groupID == 328 || $groupID == 326 || $groupID == 773) {
 					if (strstr(strtolower($modName), "hardener")) {
 						$exBonus = $bonus;
 						$order = 1;
@@ -3473,15 +3445,14 @@ bd($moduleArr, 'modulearr');
 					) {
 						$exBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
 						$order = 1;
-					} else if ($groupID == "773") {
+					} else if ($groupID == 773) {
 						$exBonus = $bonus;
 						$order = 1;
 					} else {
 						$exBonus = fittingTools::statOntoShip($bonus, (5 * 5), "+", "%", 1);
-						//$order = 2;
-						if ($groupID == "98") {
+						if ($groupID == 98) {
 							$order = 5;
-						} else if ($groupID == "326") {
+						} else if ($groupID == 326) {
 							$order = 2;
 						}
 					}
@@ -3493,20 +3464,16 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "ex";
 						$arr[self::$shieldResistPos]['amount'] = $exBonus;
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$exArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
 					}
-					//self::$exArmor++;
 				} else {
-					//self::$shipStats->setShieldEx(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldEx(), ($bonus*$skillBonus), $type, self::$exShield));
-					//self::$exShield++;
 
-					if ($groupID == "77") {
+					if ($groupID == 77) {
 						$order = 2;
 						$exBonus = $bonus;
-					} else if ($groupID == "774") {
+					} else if ($groupID == 774) {
 						$exBonus = $bonus;
 						$order = 2;
 					} else {
@@ -3521,7 +3488,6 @@ bd($moduleArr, 'modulearr');
 						$arr[self::$shieldResistPos]['resist'] = "ex";
 						$arr[self::$shieldResistPos]['amount'] = ($exBonus * $skillBonus);
 						$arr[self::$shieldResistPos]['type'] = $type;
-						//$arr[self::$shieldResistPos]['neg'] = self::$exArmor;
 						$arr[self::$shieldResistPos]['order'] = $order;
 						self::$shipStats->setShipResists($arr);
 						self::$shieldResistPos++;
@@ -3529,7 +3495,6 @@ bd($moduleArr, 'modulearr');
 				}
 
 			} else {
-				//self::$shipStats->setShieldEx(fittingTools::getLevel5SkillsPlus(self::$shipStats->getShieldEx(), ($bonus*$skillBonus), $type, 1));
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
 					$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3537,7 +3502,6 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "ex";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$exArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
@@ -3560,8 +3524,6 @@ bd($moduleArr, 'modulearr');
 				$bonus = (1 - $bonus) * 100;
 			}
 			if (!$negEffect && $groupID != "60") {
-				//self::$shipStats->setArmorEM(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorEM(), ($bonus*$skillBonus), $type, self::$emArmor));
-				//self::$emArmor++;
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
 					$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3569,13 +3531,11 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "em";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 2;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
 				}
 			} else {
-				//self::$shipStats->setArmorEM(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorEM(), ($bonus*$skillBonus), $type, 1));
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
 					$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3583,7 +3543,6 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "em";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
@@ -3605,15 +3564,11 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "th";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 2;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
 				}
-				//self::$shipStats->setArmorTh(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorTh(), ($bonus*$skillBonus), $type, self::$thArmor));
-				//self::$thArmor++;
 			} else {
-				//self::$shipStats->setArmorTh(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorTh(), ($bonus*$skillBonus), $type, 1));
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
 					$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3621,7 +3576,6 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "th";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
@@ -3636,9 +3590,6 @@ bd($moduleArr, 'modulearr');
 			}
 
 			if (!$negEffect && $groupID != "60") {
-				//self::$kiArmor++;
-				//self::$shipStats->setArmorKi(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorKi(), ($bonus*$skillBonus), $type, self::$kiArmor));
-				//self::$kiArmor++;
 
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
@@ -3647,13 +3598,11 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "ki";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 2;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
 				}
 			} else {
-				//self::$shipStats->setArmorKi(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorKi(), ($bonus*$skillBonus), $type, 1));
 
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
@@ -3677,8 +3626,6 @@ bd($moduleArr, 'modulearr');
 			}
 
 			if (!$negEffect && $groupID != "60") {
-				//self::$shipStats->setArmorEx(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorEx(), ($bonus*$skillBonus), $type, self::$exArmor));
-				//self::$exArmor++;
 
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
@@ -3687,13 +3634,11 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "ex";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 2;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
 				}
 			} else {
-				//self::$shipStats->setArmorEx(fittingTools::getLevel5SkillsPlus(self::$shipStats->getArmorEx(), ($bonus*$skillBonus), $type, 1));
 				if ($bonus != 0) {
 					$arr = self::$shipStats->getShipResists();
 					$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3701,7 +3646,6 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$shieldResistPos]['resist'] = "ex";
 					$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 					$arr[self::$shieldResistPos]['type'] = $type;
-					//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 					$arr[self::$shieldResistPos]['order'] = 3;
 					self::$shipStats->setShipResists($arr);
 					self::$shieldResistPos++;
@@ -3715,7 +3659,6 @@ bd($moduleArr, 'modulearr');
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			//self::$shipStats->setHullEM(fittingTools::getLevel5SkillsPlus(self::$shipStats->getHullEM(), ($bonus*$skillBonus), $type, 1));
 			if ($bonus != 0) {
 				$arr = self::$shipStats->getShipResists();
 				$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3723,7 +3666,6 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$shieldResistPos]['resist'] = "em";
 				$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 				$arr[self::$shieldResistPos]['order'] = 3;
 				self::$shipStats->setShipResists($arr);
 				self::$shieldResistPos++;
@@ -3735,7 +3677,6 @@ bd($moduleArr, 'modulearr');
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			//self::$shipStats->setHullTh(fittingTools::getLevel5SkillsPlus(self::$shipStats->getHullTh(), ($bonus*$skillBonus), $type, 1));
 			if ($bonus != 0) {
 				$arr = self::$shipStats->getShipResists();
 				$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3743,7 +3684,6 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$shieldResistPos]['resist'] = "th";
 				$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 				$arr[self::$shieldResistPos]['order'] = 3;
 				self::$shipStats->setShipResists($arr);
 				self::$shieldResistPos++;
@@ -3755,7 +3695,6 @@ bd($moduleArr, 'modulearr');
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			//self::$shipStats->setHullKi(fittingTools::getLevel5SkillsPlus(self::$shipStats->getHullKi(), ($bonus*$skillBonus), $type, 1));
 			if ($bonus != 0) {
 				$arr = self::$shipStats->getShipResists();
 				$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3763,7 +3702,6 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$shieldResistPos]['resist'] = "ki";
 				$arr[self::$shieldResistPos]['amount'] = ($bonus * $skillBonus);
 				$arr[self::$shieldResistPos]['type'] = $type;
-				//$arr[self::$shieldResistPos]['neg'] = self::$kiArmor;
 				$arr[self::$shieldResistPos]['order'] = 3;
 				self::$shipStats->setShipResists($arr);
 				self::$shieldResistPos++;
@@ -3775,7 +3713,6 @@ bd($moduleArr, 'modulearr');
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			//self::$shipStats->setHullEx(fittingTools::getLevel5SkillsPlus(self::$shipStats->getHullEx(), ($bonus*$skillBonus), $type, 1));
 			if ($bonus != 0) {
 				$arr = self::$shipStats->getShipResists();
 				$arr[self::$shieldResistPos]['name'] = $modName;
@@ -3792,9 +3729,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		//echo $modName." - ".self::$moduleCount." - ".$effect." - ".$bonus."<br />";
 		if (strtolower($effect) == "powerengineeringoutputbonus") {
-			//echo $modName." - ".$bonus."<br />";
 			$arr = self::$loadPowerAdd;
 			$arr[self::$moduleCount]['name'] = $modName;
 			$arr[self::$moduleCount]['power'] = $bonus;
@@ -3855,16 +3790,13 @@ bd($moduleArr, 'modulearr');
 
 		}
 
-		//echo $modName." - ".$effect." -- ".$bonus." -- ".$icon."<br />";
 		if (strtolower($effect) == "cpuoutput") {
-			//if($bonus != 0 && (self::$shipStats->getCpuAmount() < $bonus)) {
 			self::$shipStats->setCpuAmount($bonus + self::$shipStats->getCpuAmount());
 
-			//}
 			return true;
 		}
 
-		if (strtolower($effect) == "drawback" && $groupID == "778") {
+		if (strtolower($effect) == "drawback" && $groupID == 778) {
 			$arr = self::$loadCPUAdd;
 			$arr[self::$moduleCount]['name'] = $modName;
 			$arr[self::$moduleCount]['cpu'] = $bonus / 2;
@@ -3909,29 +3841,29 @@ bd($moduleArr, 'modulearr');
 			$arr[self::$moduleCount]['name'] = $modName;
 			$arr[self::$moduleCount]['cpu'] = $bonus;
 
-			if ($groupID == "330" && $modName == "Covert Ops Cloaking Device II") {
+			if ($groupID == 330 && $modName == "Covert Ops Cloaking Device II") {
 				$arr[self::$moduleCount]['effect'] = "covert_cloak";
-			} else if ($groupID == "55" && $mass == "2000") { //p
+			} else if ($groupID == 55 && $mass == "2000") { //p
 				$arr[self::$moduleCount]['effect'] = "heavy_cpu";
-			} else if ($groupID == "53" && $mass == "2000") {
+			} else if ($groupID == 53 && $mass == "2000") {
 				; //l
 				$arr[self::$moduleCount]['effect'] = "heavy_cpu";
-			} else if ($groupID == "74" && $mass == "2000") { //h
+			} else if ($groupID == 74 && $mass == "2000") { //h
 				$arr[self::$moduleCount]['effect'] = "heavy_cpu";
-			} else if ($groupID == "203" || $groupID == "285" || $groupID == "766" || $groupID == "767" || $groupID == "768") {
+			} else if ($groupID == 203 || $groupID == 285 || $groupID == 766 || $groupID == 767 || $groupID == 768) {
 				$arr[self::$moduleCount]['effect'] = "cpu_use";
-			} else if ($groupID == "769" || $groupID == "43") { //h
+			} else if ($groupID == 769 || $groupID == 43) { //h
 				$arr[self::$moduleCount]['effect'] = "cpu_use";
-			} else if ($groupID == "316") {
+			} else if ($groupID == 316) {
 				$arr[self::$moduleCount]['effect'] = "war_bonus";
-			} else if ($groupID == "41") {
+			} else if ($groupID == 41) {
 				$arr[self::$moduleCount]['effect'] = "shield_transCPU";
-			} else if ($groupID == "55" || $groupID == "74"
-				|| $groupID == "510" || $groupID == "507" || $groupID == "508" || $groupID == "509" || $groupID == "511" || $groupID == "771" || $groupID == "506" || $groupID == "524" || $groupID == "53"
-				|| $groupID == "72" || $groupID == "74" || ($groupID == "862" && $modName == "Bomb Launcher I")
+			} else if ($groupID == 55 || $groupID == 74
+				|| $groupID == 510 || $groupID == 507 || $groupID == 508 || $groupID == 509 || $groupID == 511 || $groupID == 771 || $groupID == 506 || $groupID == 524 || $groupID == 53
+				|| $groupID == 72 || $groupID == 74 || ($groupID == 862 && $modName == "Bomb Launcher I")
 			) {
 				$arr[self::$moduleCount]['effect'] = "weapon";
-			} else if ($groupID == "407") {
+			} else if ($groupID == 407) {
 				$arr[self::$moduleCount]['effect'] = "capital_cpu";
 			} else {
 				$arr[self::$moduleCount]['effect'] = "base";
@@ -3947,21 +3879,21 @@ bd($moduleArr, 'modulearr');
 			$arr[self::$moduleCount]['name'] = $modName;
 			$arr[self::$moduleCount]['power'] = $bonus;
 
-			if ($groupID == "38" || $groupID == "39") {
+			if ($groupID == 38 || $groupID == 39) {
 				$arr[self::$moduleCount]['effect'] = "shield";
-			} else if ($groupID == "508" && strpos(strtolower($modName), "torpedo") > -1) {
+			} else if ($groupID == 508 && strpos(strtolower($modName), "torpedo") > -1) {
 				$arr[self::$moduleCount]['effect'] = "seige_power";
-			} else if ($groupID == "55" && $mass == "2000") { //p
+			} else if ($groupID == 55 && $mass == "2000") { //p
 				$arr[self::$moduleCount]['effect'] = "heavy_power";
-			} else if ($groupID == "53" && $mass == "2000") { //l
+			} else if ($groupID == 53 && $mass == "2000") { //l
 				$arr[self::$moduleCount]['effect'] = "heavy_power";
-			} else if ($groupID == "74" && $mass == "2000") { //h
+			} else if ($groupID == 74 && $mass == "2000") { //h
 				$arr[self::$moduleCount]['effect'] = "heavy_power";
-			} else if ($groupID == "67") {
+			} else if ($groupID == 67) {
 				$arr[self::$moduleCount]['effect'] = "cap_transPower";
-			} else if ($groupID == "55" || $groupID == "74"
-				|| $groupID == "510" || $groupID == "507" || $groupID == "508" || $groupID == "509" || $groupID == "511" || $groupID == "771" || $groupID == "506" || $groupID == "524" || $groupID == "53"
-				|| $groupID == "72" || $groupID == "74" || ($groupID == "862" && $modName == "Bomb Launcher I")
+			} else if ($groupID == 55 || $groupID == 74
+				|| $groupID == 510 || $groupID == 507 || $groupID == 508 || $groupID == 509 || $groupID == 511 || $groupID == 771 || $groupID == 506 || $groupID == 524 || $groupID == 53
+				|| $groupID == 72 || $groupID == 74 || ($groupID == 862 && $modName == "Bomb Launcher I")
 			) {
 				$arr[self::$moduleCount]['effect'] = "weapon";
 			} else {
@@ -3973,7 +3905,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "maxvelocity" && $moduleLevel != 10) {
+		if (strtolower($effect) == "maxvelocity" && $moduleSlot != 10) {
 			//echo $modName."<br />";
 			if ($groupID == "12_06") {
 			} else {
@@ -3983,7 +3915,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "implantbonusvelocity" || strtolower($effect) == "velocitybonus" && $moduleLevel != 10) {
+		if (strtolower($effect) == "implantbonusvelocity" || strtolower($effect) == "velocitybonus" && $moduleSlot != 10) {
 			//self::$shipStats->setShipSpeed($row['value']);
 
 			if ($negEffect) {
@@ -3996,17 +3928,16 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "maxvelocitybonus" && $moduleLevel != 10) {
+		if (strtolower($effect) == "maxvelocitybonus" && $moduleSlot != 10) {
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			if ($groupID == "765") {
+			if ($groupID == 765) {
 				self::$shipStats->setShipSpeed(fittingTools::statOntoShip(self::$shipStats->getShipSpeed(), $bonus, "-", $mode, self::$speedV));
-				//self::$speedB++;
 
 				self::$speedV++;
-			} else if ($groupID == "330") {
+			} else if ($groupID == 330) {
 			} else {
 				self::$shipStats->setShipSpeed(fittingTools::statOntoShip(self::$shipStats->getShipSpeed(), $bonus, "+", $mode, 0));
 			}
@@ -4033,7 +3964,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "maxtargetrangebonus") {
-			if ($groupID == "212" || $groupID == "210") {
+			if ($groupID == 212 || $groupID == 210) {
 				$arr = self::$shipStats->getSensorBooster();
 				$arr[self::$moduleCount]['range'] = $bonus;
 				$arr[self::$moduleCount]['negra'] = self::$range;
@@ -4041,8 +3972,8 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['order'] = $slotOrder;
 				self::$shipStats->setSensorBooster($arr);
 				self::$range++;
-			} else if ($groupID == "208") {
-			} else if ($groupID == "315") {
+			} else if ($groupID == 208) {
+			} else if ($groupID == 315) {
 				self::$shipStats->setDistance(fittingTools::statOntoShip(self::$shipStats->getDistance(), $bonus, "-", $mode, self::$warpStab));
 				self::$warpStab++;
 			} else {
@@ -4055,7 +3986,7 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "maxtargetrangemultiplier") {
 			//echo $moduleLevel;
-			if ($groupID == "786") {
+			if ($groupID == 786) {
 
 				$bonus = ($bonus - 1) * 100;
 				$arr = self::$shipStats->getSensorBooster();
@@ -4071,7 +4002,7 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "scanresolutionbonus") {
 			//echo $modName." -- ".self::$shipStats->getScan()." -- ".$groupID."<br />";
-			if ($groupID == "212" || $groupID == "210") {
+			if ($groupID == 212 || $groupID == 210) {
 				$arr = self::$shipStats->getSensorBooster();
 				$arr[self::$moduleCount]['scan'] = $bonus;
 				$arr[self::$moduleCount]['negsc'] = self::$scan;
@@ -4080,7 +4011,7 @@ bd($moduleArr, 'modulearr');
 				self::$shipStats->setSensorBooster($arr);
 				self::$scan++;
 				self::$sensorbooster[] = self::$moduleCount;
-			} else if ($groupID == "208") {
+			} else if ($groupID == 208) {
 			} else {
 				self::$shipStats->setScan(fittingTools::statOntoShip(self::$shipStats->getScan(), $bonus, "+", $mode, self::$scan));
 				self::$scan++;
@@ -4090,7 +4021,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "maxtargetrangebonusbonus") {
-			if ($groupID == "910") {
+			if ($groupID == 910) {
 
 				$arr = self::$shipStats->getSensorBooster();
 				$arr[self::$sensorbooster[0]]['scan'] = 0;
@@ -4106,8 +4037,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "scanresolutionbonusbonus") {
-			//echo "here<br/>";
-			if ($groupID == "910") {
+			if ($groupID == 910) {
 				$arr = self::$shipStats->getSensorBooster();
 				$arr[self::$sensorbooster[0]]['scan'] = $arr[self::$sensorbooster[0]]['scan'] * 2;
 				$arr[self::$sensorbooster[0]]['range'] = 0;
@@ -4139,7 +4069,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "capacitorcapacity" && $moduleLevel == 7) {
+		if (strtolower($effect) == "capacitorcapacity" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			if ($bonus != 0) {
 				self::$shipStats->setCapAmount(fittingTools::statOntoShip(self::$shipStats->getCapAmount(), $bonus, "+", $mode, 0));
 			}
@@ -4155,7 +4085,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if (strtolower($effect) == "rechargerate" && $moduleLevel == 7) {
+		if (strtolower($effect) == "rechargerate" && $moduleSlot == ShipSlotEnum::SUBSYSTEM) {
 			if ($bonus != 0) {
 				self::$shipStats->setCapRecharge(fittingTools::statOntoShip(self::$shipStats->getCapRecharge(), $bonus, "+", $mode, 0));
 			}
@@ -4165,11 +4095,11 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "scanresolutionmultiplier") {
 
-			if ($groupID == "786") {
+			if ($groupID == 786) {
 				$bonus = ($bonus - 1) * 100;
 				self::$shipStats->setScan(fittingTools::statOntoShip(self::$shipStats->getScan(), $bonus, "+", $mode, self::$shieldHpRed));
 				self::$shieldHpRed++;
-			} else if ($groupID == "315") {
+			} else if ($groupID == 315) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4192,10 +4122,10 @@ bd($moduleArr, 'modulearr');
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			if ($groupID == "769" || $groupID == "766") {
+			if ($groupID == 769 || $groupID == 766) {
 				$bonus = ($bonus - 1) * 100;
 				self::$shipStats->setCapAmount(fittingTools::statOntoShip(self::$shipStats->getCapAmount(), $bonus, "+", $mode, 1));
-			} else if ($groupID == "781") {
+			} else if ($groupID == 781) {
 				self::$shipStats->setCapAmount(fittingTools::statOntoShip(self::$shipStats->getCapAmount(), $bonus, "+", $mode, 1));
 			} else {
 				if ($bonus != 1) {
@@ -4210,15 +4140,13 @@ bd($moduleArr, 'modulearr');
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
-			//echo $modName." ".self::$shipStats->getSigRadius()."<br />";
 			self::$shipStats->setSigRadius(fittingTools::statOntoShip(self::$shipStats->getSigRadius(), $bonus, "+", $mode, 0));
 
-			//echo $bonus." ".self::$shipStats->getSigRadius()." ".$mode."<br />";
 			return true;
 		}
 
 		if (strtolower($effect) == "signatureradiusbonus") {
-			if ($groupID == "46") {
+			if ($groupID == 46) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4228,9 +4156,9 @@ bd($moduleArr, 'modulearr');
 				}
 
 				self::$shipStats->setMwdSig($bonus);
-			} else if ($groupID == "379") {
+			} else if ($groupID == 379) {
 
-			} else if ($groupID == "52") {
+			} else if ($groupID == 52) {
 
 				$arr = self::$shipStats->getSigRadiusBoost();
 				$arr[self::$moduleCount]['sigAdd'] = $bonus;
@@ -4249,7 +4177,7 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "signatureradiusbonusbonus") {
 
-			if ($groupID == "908") {
+			if ($groupID == 908) {
 
 				$arr = self::$shipStats->getSigRadiusBoost();
 				$arr[self::$srBooster[0]]['sigAdd'] = "0";
@@ -4263,7 +4191,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "speedboostfactor") {
-			if ($groupID == "46") {
+			if ($groupID == 46) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4279,7 +4207,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "massaddition") {
-			if ($groupID == "46") {
+			if ($groupID == 46) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4298,7 +4226,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "speedfactor") {
-			if ($groupID == "46") {
+			if ($groupID == 46) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4323,7 +4251,6 @@ bd($moduleArr, 'modulearr');
 			}
 			self::$shipStats->setMwdSigRed($bonus);
 
-			//echo self::$shipStats->getMwdSigRed();
 			return true;
 		}
 
@@ -4335,15 +4262,14 @@ bd($moduleArr, 'modulearr');
 				} else if ($bonus == 1) {
 					$bonus = 0;
 				}
-				//echo $modName." -- ".$groupID." -- ".$bonus."<br />";
 				if ($bonus != 0) {
-					if ($groupID == "57") {
+					if ($groupID == 57) {
 						self::$shipStats->setCapRecharge(fittingTools::statOntoShip(self::$shipStats->getCapRecharge(), ($bonus - 1) * 100, "+", $mode, 0));
 					} else {
 						self::$shipStats->setCapRecharge(fittingTools::statOntoShip(self::$shipStats->getCapRecharge(), $bonus, "-", $mode, 0));
 					}
 				}
-			} else if ($groupID == "43") {
+			} else if ($groupID == 43) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				} else if ($bonus == 1) {
@@ -4351,10 +4277,9 @@ bd($moduleArr, 'modulearr');
 				}
 
 				if ($bonus != 0) {
-					//echo $modName." ".$bonus."2<br />";
 					self::$shipStats->setCapRecharge(fittingTools::statOntoShip(self::$shipStats->getCapRecharge(), $bonus, "-", $mode, 0));
 				}
-			} else if ($groupID == "39") {
+			} else if ($groupID == 39) {
 				$bonus = ($bonus - 1) * 100;
 				self::$shipStats->setCapRecharge(fittingTools::statOntoShip(self::$shipStats->getCapRecharge(), $bonus, "+", $mode, 0));
 			}
@@ -4402,7 +4327,7 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "durationskillbonus") {
 
-			if ($groupID == "774") {
+			if ($groupID == 774) {
 				$arr = self::$shieldDur;
 				$arr[self::$moduleCount]['dur'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "-";
@@ -4422,50 +4347,43 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "drawback") {
-			if ($groupID == "773") {
-				//return "speedBoost";
+			if ($groupID == 773) {
 				self::$shipStats->setShipSpeed(fittingTools::statOntoShip(self::$shipStats->getShipSpeed(), (($bonus / 100) * (10 * 5)), "-", $mode, self::$speedV));
 				self::$speedV++;
-			} else if ($groupID == "774") {
-				//return "sigradius";
+			} else if ($groupID == 774) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
-				//echo $modName." ".self::$shipStats->getSigRadius()."<br />";
 				self::$shipStats->setSigRadius(fittingTools::statOntoShip(self::$shipStats->getSigRadius(), (($bonus / 100) * (10 * 5)), "+", $mode, self::$sigRadius));
 				self::$sigRadius++;
-			} else if ($groupID == "782") {
-				//return "armorhp";
+			} else if ($groupID == 782) {
 
 				self::$shipStats->setArmorAmount(fittingTools::statOntoShip(self::$shipStats->getArmorAmount(), (($bonus / 100) * (10 * 5)), "-", $mode, 1));
-			} else if ($groupID == "786") {
-				//return "shieldhp";
+			} else if ($groupID == 786) {
 				self::$shipStats->setShieldAmount(fittingTools::statOntoShip(self::$shipStats->getShieldAmount(), (($bonus / 100) * (10 * 5)), "-", $mode, 1));
-			} else {
-				//return $input;
 			}
 
 			return true;
 		}
 
 		if (strtolower($effect) == "duration") {
-			if ($groupID == "76") {
+			if ($groupID == 76) {
 				$arr = self::$shipStats->getCapInj();
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
 				self::$shipStats->setCapInj($arr);
 				self::$boosterPos[] = self::$moduleCount;
-			} else if ($groupID == "41" && strstr(strtolower($modName), "transporter")) {
+			} else if ($groupID == 41 && strstr(strtolower($modName), "transporter")) {
 				$arr = self::$shipStats->getTransCap();
 				$arr[self::$moduleCount]['type'] = "shieldTrans";
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
 				self::$shipStats->setTransCap($arr);
-			} else if ($groupID == "325" && strstr(strtolower($modName), "remote") || strstr(strtolower($modName), "regenerative projector")) {
+			} else if ($groupID == 325 && strstr(strtolower($modName), "remote") || strstr(strtolower($modName), "regenerative projector")) {
 				$arr = self::$shipStats->getTransCap();
 				$arr[self::$moduleCount]['type'] = "armorTrans";
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
 				self::$shipStats->setTransCap($arr);
-			} else if ($groupID == "67" && strstr(strtolower($modName), "transfer")
+			} else if ($groupID == 67 && strstr(strtolower($modName), "transfer")
 				|| strstr(strtolower($modName), "power projector")
 				|| strstr(strtolower($modName), "energy succor")
 				|| strstr(strtolower($modName), "energy transmitter")
@@ -4475,7 +4393,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['type'] = "energyTrans";
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
 				self::$shipStats->setTransCap($arr);
-			} else if ($groupID == "40") {
+			} else if ($groupID == 40) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['dur'] = ($bonus / 1000);
 				self::$shipStats->setTankBoost($arr);
@@ -4484,11 +4402,11 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
 				self::$shipStats->setCapGJ($arr);
-			} else if ($groupID == "1156") {
+			} else if ($groupID == 1156) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['dur'] = ($bonus / 1000);
 				self::$shipStats->setTankBoost($arr);
-			} else if ($groupID == "1199") {
+			} else if ($groupID == 1199) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['dur'] = ($bonus / 1000);
 				self::$shipStats->setTankBoost($arr);
@@ -4496,7 +4414,7 @@ bd($moduleArr, 'modulearr');
 				$arr = self::$shipStats->getCapGJ();
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
-			} else if ($groupID == "62") {
+			} else if ($groupID == 62) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['dur'] = ($bonus / 1000);
 				self::$shipStats->setTankBoost($arr);
@@ -4505,7 +4423,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['duration'] = ($bonus / 1000);
 				self::$shipStats->setCapGJ($arr);
-			} else if ($groupID == "72") {
+			} else if ($groupID == 72) {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['rof'] = ($bonus / 1000);
@@ -4528,9 +4446,8 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-//echo $modName." -> ".$effect." -> ".$bonus."<br />";
 		if (strtolower($effect) == "chargegroup2") {
-			if ($groupID == "1156") {
+			if ($groupID == 1156) {
 				$arr = self::$shipStats->getTankBoost();
 				if (strstr(strtolower($modName), "x-large")) {
 					$arr[self::$moduleCount]['amount'] = 5;
@@ -4542,7 +4459,7 @@ bd($moduleArr, 'modulearr');
 					$arr[self::$moduleCount]['amount'] = 11;
 				}
 				self::$shipStats->setTankBoost($arr);
-			} else if ($groupID == "1199") {
+			} else if ($groupID == 1199) {
 				$arr = self::$shipStats->getTankBoost();
 				if (strstr(strtolower($modName), "x-large")) {
 					$arr[self::$moduleCount]['amount'] = 5;
@@ -4558,15 +4475,15 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "capacitorneed") {
-			if ($groupID == "41" && strstr(strtolower($modName), "transporter")) {
+			if ($groupID == 41 && strstr(strtolower($modName), "transporter")) {
 				$arr = self::$shipStats->getTransCap();
 				$arr[self::$moduleCount]['capNeeded'] = $bonus;
 				self::$shipStats->setTransCap($arr);
-			} else if ($groupID == "325" && strstr(strtolower($modName), "remote") || strstr(strtolower($modName), "regenerative projector")) {
+			} else if ($groupID == 325 && strstr(strtolower($modName), "remote") || strstr(strtolower($modName), "regenerative projector")) {
 				$arr = self::$shipStats->getTransCap();
 				$arr[self::$moduleCount]['capNeeded'] = $bonus;
 				self::$shipStats->setTransCap($arr);
-			} else if ($groupID == "67" && strstr(strtolower($modName), "transfer")
+			} else if ($groupID == 67 && strstr(strtolower($modName), "transfer")
 				|| strstr(strtolower($modName), "power projector")
 				|| strstr(strtolower($modName), "energy succor")
 				|| strstr(strtolower($modName), "energy transmitter")
@@ -4575,11 +4492,11 @@ bd($moduleArr, 'modulearr');
 				$arr = self::$shipStats->getTransCap();
 				$arr[self::$moduleCount]['capNeeded'] = $bonus;
 				self::$shipStats->setTransCap($arr);
-			} else if ($groupID == "74" || $groupID == "53") {
+			} else if ($groupID == 74 || $groupID == 53) {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$moduleCount]['capNeed'] = $bonus;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "72") {
+			} else if ($groupID == 72) {
 				$arr = self::$shipStats->getCapGJ();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['capacity'] = 1;
@@ -4616,7 +4533,7 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "capacitorbonus") {
 
-			if ($groupID == "61") {
+			if ($groupID == 61) {
 				if ($bonus != 0) {
 					self::$shipStats->setCapAmount(fittingTools::statOntoShip(self::$shipStats->getCapAmount(), $bonus, "+", $mode, 1));
 				}
@@ -4637,7 +4554,7 @@ bd($moduleArr, 'modulearr');
 
 			$arr = self::$shipStats->getCapGJ();
 
-			if ($groupID == "909") {
+			if ($groupID == 909) {
 
 				foreach ($arr as $i => $value) {
 					if ($value['name'] == "Warp Disruption Field Generator I" && $value['durationBonus'] == null) {
@@ -4656,7 +4573,7 @@ bd($moduleArr, 'modulearr');
 
 			$arr = self::$shipStats->getCapGJ();
 
-			if ($groupID == "909") {
+			if ($groupID == 909) {
 
 				foreach ($arr as $i => $value) {
 					if ($value['name'] == "Warp Disruption Field Generator I" && $value['capNeededBonus'] == null) {
@@ -4664,14 +4581,14 @@ bd($moduleArr, 'modulearr');
 					}
 				}
 
-			} else if ($groupID == "86") {
+			} else if ($groupID == 86) {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$gunPosCap[0]]['capNeededBonus'] = $bonus;
 				self::$shipStats->setDamageGun($arr);
 
 				unset(self::$gunPosCap[0]);
 				self::$gunPosCap = array_values(self::$gunPosCap);
-			} else if ($groupID == "773") {
+			} else if ($groupID == 773) {
 				$arr = self::$shipStats->getTransCapEff();
 				$arr[self::$moduleCount]['type'] = "armorTrans";
 				$arr[self::$moduleCount]['amount'] = $bonus;
@@ -4685,7 +4602,7 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "speed") {
 
-			if ($groupID == "55" && (strpos($modName, "125") > -1 || strpos($modName, "150") > -1 || strpos($modName, "200") > -1 || strpos($modName, "250") > -1 || strpos($modName, "280") > -1)) {
+			if ($groupID == 55 && (strpos($modName, "125") > -1 || strpos($modName, "150") > -1 || strpos($modName, "200") > -1 || strpos($modName, "250") > -1 || strpos($modName, "280") > -1)) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4695,7 +4612,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "55" && (strpos($modName, "Dual 180") > -1 || strpos($modName, "220") > -1 || strpos($modName, "425") > -1 || strpos($modName, "650") > -1 || strpos($modName, "720") > -1)) {
+			} else if ($groupID == 55 && (strpos($modName, "Dual 180") > -1 || strpos($modName, "220") > -1 || strpos($modName, "425") > -1 || strpos($modName, "650") > -1 || strpos($modName, "720") > -1)) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4705,7 +4622,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "55" && (strpos($modName, "Dual 425") > -1 || strpos($modName, "Dual 650") > -1 || strpos($modName, "800") > -1 || strpos($modName, "1200") > -1 || strpos($modName, "1400") > -1)) {
+			} else if ($groupID == 55 && (strpos($modName, "Dual 425") > -1 || strpos($modName, "Dual 650") > -1 || strpos($modName, "800") > -1 || strpos($modName, "1200") > -1 || strpos($modName, "1400") > -1)) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4715,7 +4632,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "55" && (strpos($modName, "2500") > -1 || strpos($modName, "3500") > -1)) {
+			} else if ($groupID == 55 && (strpos($modName, "2500") > -1 || strpos($modName, "3500") > -1)) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4727,7 +4644,7 @@ bd($moduleArr, 'modulearr');
 				self::$shipStats->setDamageGun($arr);
 			}
 
-			if ($groupID == "74" && $mass == "500") {
+			if ($groupID == 74 && $mass == "500") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4737,7 +4654,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "74" && $mass == "1000") {
+			} else if ($groupID == 74 && $mass == "1000") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4747,7 +4664,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "74" && $mass == "2000") {
+			} else if ($groupID == 74 && $mass == "2000") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4757,7 +4674,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "74" && $mass == "40000") {
+			} else if ($groupID == 74 && $mass == "40000") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4769,7 +4686,7 @@ bd($moduleArr, 'modulearr');
 				self::$shipStats->setDamageGun($arr);
 			}
 
-			if ($groupID == "53" && $mass == "500") {
+			if ($groupID == 53 && $mass == "500") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4779,7 +4696,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "53" && $mass == "1000") {
+			} else if ($groupID == 53 && $mass == "1000") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4789,7 +4706,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "53" && $mass == "2000") {
+			} else if ($groupID == 53 && $mass == "2000") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4799,7 +4716,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "53" && $mass == "40000") {
+			} else if ($groupID == 53 && $mass == "40000") {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4811,7 +4728,7 @@ bd($moduleArr, 'modulearr');
 				self::$shipStats->setDamageGun($arr);
 			}
 
-			if ($groupID == "507" || $groupID == "511" || $groupID == "509") {
+			if ($groupID == 507 || $groupID == 511 || $groupID == 509) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4821,7 +4738,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "510" || $groupID == "771") {
+			} else if ($groupID == 510 || $groupID == 771) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4831,7 +4748,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "506" || $groupID == "508") {
+			} else if ($groupID == 506 || $groupID == 508) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4841,7 +4758,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['capacity'] = $capacity;
 				$arr[self::$moduleCount]['techlevel'] = $techLevel;
 				self::$shipStats->setDamageGun($arr);
-			} else if ($groupID == "524") {
+			} else if ($groupID == 524) {
 				self::$gunPos[] = self::$moduleCount;
 				self::$gunPosCap[] = self::$moduleCount;
 				$arr = self::$shipStats->getDamageGun();
@@ -4858,43 +4775,43 @@ bd($moduleArr, 'modulearr');
 
 		if (strtolower($effect) == "damagemultiplier") {
 
-			if ($groupID == "55") {
+			if ($groupID == 55) {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$moduleCount]['damageP'] = $bonus;
 				self::$shipStats->setDamageGun($arr);
 			}
 
-			if ($groupID == "74") {
+			if ($groupID == 74) {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$moduleCount]['damageH'] = $bonus;
 				self::$shipStats->setDamageGun($arr);
 			}
 
-			if ($groupID == "53") {
+			if ($groupID == 53) {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$moduleCount]['damageL'] = $bonus;
 				self::$shipStats->setDamageGun($arr);
 			}
 
-			if ($groupID == "776") {
+			if ($groupID == 776) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$hybridDam++;
 				$arr[self::$moduleCount]['damageH'] = ($bonus - 1) * 100;
 				self::$shipStats->setDamageModules($arr);
-			} else if ($groupID == "775") {
+			} else if ($groupID == 775) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$lazerDam++;
 				$arr[self::$moduleCount]['damageL'] = ($bonus - 1) * 100;
 				self::$shipStats->setDamageModules($arr);
-			} else if ($groupID == "777") {
+			} else if ($groupID == 777) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$projectileDam++;
 				$arr[self::$moduleCount]['damageP'] = ($bonus - 1) * 100;
 				self::$shipStats->setDamageModules($arr);
-			} else if ($groupID == "779") {
+			} else if ($groupID == 779) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$missileDam++;
@@ -4902,7 +4819,7 @@ bd($moduleArr, 'modulearr');
 				self::$shipStats->setDamageModules($arr);
 			}
 
-			if ($groupID == "205") {
+			if ($groupID == 205) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4913,7 +4830,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['damage' . $dex] = ($bonus - 1) * 100;
 				self::$shipStats->setDamageModules($arr);
 			}
-			if ($groupID == "302") {
+			if ($groupID == 302) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4924,7 +4841,7 @@ bd($moduleArr, 'modulearr');
 				$arr[self::$moduleCount]['damage' . $dex] = ($bonus - 1) * 100;
 				self::$shipStats->setDamageModules($arr);
 			}
-			if ($groupID == "59") {
+			if ($groupID == 59) {
 				if ($bonus < 1) {
 					$bonus = (1 - $bonus) * 100;
 				}
@@ -4939,7 +4856,7 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		if ($groupID == "72") {
+		if ($groupID == 72) {
 			if (strtolower($effect) == "emdamage") {
 				$arr = self::$shipStats->getDamageGun();
 				$arr[self::$moduleCount]['emDamage'] = $bonus;
@@ -5018,25 +4935,25 @@ bd($moduleArr, 'modulearr');
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			if ($groupID == "776") {
+			if ($groupID == 776) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$hybridRof++;
 				$arr[self::$moduleCount]['rofH'] = $bonus;
 				self::$shipStats->setDamageModules($arr);
-			} else if ($groupID == "775") {
+			} else if ($groupID == 775) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$lazerRof++;
 				$arr[self::$moduleCount]['rofL'] = $bonus;
 				self::$shipStats->setDamageModules($arr);
-			} else if ($groupID == "777") {
+			} else if ($groupID == 777) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$projectileRof++;
 				$arr[self::$moduleCount]['rofP'] = $bonus;
 				self::$shipStats->setDamageModules($arr);
-			} else if ($groupID == "779") {
+			} else if ($groupID == 779) {
 				$arr = self::$shipStats->getDamageModules();
 				$arr[self::$moduleCount]['name'] = $modName;
 				$arr[self::$moduleCount]['neg'] = self::$missileRof++;
@@ -5119,7 +5036,7 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "dronedamagebonus") {
-			//echo "here";
+
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
@@ -5137,20 +5054,17 @@ bd($moduleArr, 'modulearr');
 			return true;
 		}
 
-		//echo $modName." - ".$effect." -- ".$bonus." -- ".$groupID."<br />";
-
 		if (strtolower($effect) == "shieldrechargeratemultiplier" || strtolower($effect) == "rechargeratebonus") {
-			//self::$shipStats->setShieldRecharge($row['value']/1000);
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			if ($groupID == "766") {
+			if ($groupID == 766) {
 				if (!fittingTools::isReactor($modName)) {
 					self::$shipStats->setShieldRecharge(fittingTools::statOntoShip(self::$shipStats->getShieldRecharge(), $bonus, "-", $mode, 1));
 				}
-			} else if ($groupID == "774" || $groupID == "36" || $groupID == "770" || $groupID == "57") {
+			} else if ($groupID == 774 || $groupID == 36 || $groupID == 770 || $groupID == 57) {
 				self::$shipStats->setShieldRecharge(fittingTools::statOntoShip(self::$shipStats->getShieldRecharge(), $bonus, "-", $mode, 1));
 			}
 
@@ -5158,20 +5072,19 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "shieldbonus") {
-			//self::$shipStats->setShieldRecharge($row['value']/1000);
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			if ($groupID == "40") {
+			if ($groupID == 40) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['boost'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "shield";
 				self::$shipStats->setTankBoost($arr);
 			}
 
-			if ($groupID == "1156") {
+			if ($groupID == 1156) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['boost'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "shield";
@@ -5183,19 +5096,18 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "armordamageamount") {
-			//self::$shipStats->setShieldRecharge($row['value']/1000);
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			if ($groupID == "62") {
+			if ($groupID == 62) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['boost'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "armor";
 				self::$shipStats->setTankBoost($arr);
 			}
-			if ($groupID == "1199") {
+			if ($groupID == 1199) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['boost'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "armor";
@@ -5206,13 +5118,12 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "structuredamageamount") {
-			//self::$shipStats->setShieldRecharge($row['value']/1000);
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			if ($groupID == "63") {
+			if ($groupID == 63) {
 				$arr = self::$shipStats->getTankBoost();
 				$arr[self::$moduleCount]['boost'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "hull";
@@ -5223,13 +5134,12 @@ bd($moduleArr, 'modulearr');
 		}
 
 		if (strtolower($effect) == "shieldboostmultiplier") {
-			//self::$shipStats->setShieldRecharge($row['value']/1000);
 
 			if ($bonus < 1) {
 				$bonus = (1 - $bonus) * 100;
 			}
 
-			if ($groupID == "338") {
+			if ($groupID == 338) {
 				$arr = self::$shipStats->getTankAmpShield();
 				$arr[self::$moduleCount]['boost'] = $bonus;
 				$arr[self::$moduleCount]['type'] = "+";
@@ -5237,15 +5147,6 @@ bd($moduleArr, 'modulearr');
 				self::$shipStats->setTankAmpShield($arr);
 				self::$shieldAmp++;
 			}
-
-			/* else if($groupID == "01_01") {
-			$arr = self::$shipStats->getTankAmpShield();
-			$arr[self::$moduleCount]['boost'] = $bonus;
-			$arr[self::$moduleCount]['type'] = "-";
-			$arr[self::$moduleCount]['neg'] = self::$shieldAmp;
-			self::$shipStats->setTankAmpShield($arr);
-			self::$shieldAmp++;
-		}*/
 
 			return true;
 		}
@@ -5285,8 +5186,6 @@ bd($moduleArr, 'modulearr');
 		} else {
 			return false;
 		}
-
-		return false;
 	}
 
 	static function displayShipStats($param_ship, $param_shipimgx, $param_shipimgy) {
@@ -5469,7 +5368,6 @@ bd($moduleArr, 'modulearr');
 			}
 		}
 
-		//$perprg = ((self::$loadPower/self::$shipStats->getPrgAmount()));
 		$ping = 12 * $perprg; //($perprg/2)*10;
 
 		$startprgX = 149;
@@ -5570,8 +5468,8 @@ bd($moduleArr, 'modulearr');
 		$smarty->assign('totalCapUse', round(fittingTools::totalCapUse(), 1));
 		$smarty->assign('totalCapInjected', round((self::$shipStats->getCapRechargeRate() + fittingTools::totalCapInjected()), 1));
 
-		$smarty->assign('modSlotsd', self::$modSlots[6]);
-		$smarty->assign('modSlotsa', self::$modSlots[10]);
+		$smarty->assign('modSlotsd', self::$modSlots[ShipSlotEnum::DRONEBAY]);
+		$smarty->assign('modSlotsa', self::$modSlots[ShipSlotEnum::AMMO]);
 		$smarty->assign('displayOutput', fittingTools::displayOutput());
 
 		return $smarty->fetch("../../../mods/ship_display_tool/ship_display_tool.tpl");
@@ -5845,7 +5743,7 @@ bd($moduleArr, 'modulearr');
 	static function curPageURL() {
 
 		$pageURL = 'http';
-		if ($_SERVER["HTTPS"] == "on") {
+		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
 			$pageURL .= "s";
 		}
 		$pageURL .= "://";
