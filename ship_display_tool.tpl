@@ -11,8 +11,6 @@
 				<li class='liheader kb-table-header'><a href='{$getPilotNameURL}'>{$getPilotName}</a> lost a <a href='{$getPilotShipURL}'>{$getPilotShip}</a> ({$getPilotShipClass}) in <a href='{$getPilotLocURL}'>{$getPilotLoc}</a> - {$getPilotLocReg} ({$getPilotLocSec})</li>
 				<li id="shipcontainer" class="kb-table-row-even">
 					<div class="shipview">
-						<!--div id='{$backdrop}' style='left:{$left}px;top:{$top}px;'></div-->
-						<!--img src='{$simpleurlheader}img/ships/256_256/{$getShipIcon}.png' alt='' id='shipImg'/-->
 						<img src='http://image.eveonline.com/Render/{$getShipIcon}_512.png' alt='' id='shipImg'/>
 
 

@@ -19,18 +19,6 @@ class fitting {
 
 	function displayFitting() {
 
-		$eftFit = "";
-
-//		$fitting_array[1] = array();    // high slots
-//		$fitting_array[2] = array();    // med slots
-//		$fitting_array[3] = array();    // low slots
-//		$fitting_array[5] = array();    // rig slots
-//		$fitting_array[6] = array();    // drone bay
-//		$fitting_array[7] = array();    // subsystems
-//		$fitting_array[10] = array();    // ammo
-//		$ammo_array[1] = array();	// high ammo
-//		$ammo_array[2] = array();	// mid ammo
-
 		$fitting_array[ShipSlotEnum::HIGHSLOT] = []; // high slots
 		$fitting_array[ShipSlotEnum::MIDSLOT] = []; // med slots
 		$fitting_array[ShipSlotEnum::LOWSLOT] = []; // low slots
@@ -79,7 +67,7 @@ where typeID = '" . $row['itd_itm_id'] . "' and attributeName = 'metaLevel'");
 
 					for ($i = 0; $i < $row['itd_quantity']; $i++) {
 
-						$fitting_array[ShipSlotEnum::DRONEBAY][] = Array(
+						$fitting_array[ShipSlotEnum::DRONEBAY][] = array(
 							"name" => $row['typeName'],
 							"groupID" => $row['groupID'],
 							"itemid" => $row['itd_itm_id'],
@@ -109,7 +97,7 @@ inner join kb3_dgmattributetypes on kb3_dgmtypeattributes.attributeID = kb3_dgma
 where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeName = 'launcherGroup'");
 						$usedgroupID = $qry2->getRow();
 
-						$ammo_array[ShipSlotEnum::MIDSLOT][] = Array(
+						$ammo_array[ShipSlotEnum::MIDSLOT][] = array(
 							"name" => $row['typeName'],
 							"groupID" => $row['groupID'],
 							"usedgroupID" => $usedgroupID['value'],
@@ -133,7 +121,7 @@ inner join kb3_dgmattributetypes on kb3_dgmtypeattributes.attributeID = kb3_dgma
 where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeName = 'launcherGroup'");
 						$usedgroupID = $qry2->getRow();
 
-						$ammo_array[ShipSlotEnum::HIGHSLOT][] = Array(
+						$ammo_array[ShipSlotEnum::HIGHSLOT][] = array(
 							"name" => $row['typeName'],
 							"groupID" => $row['groupID'],
 							"usedgroupID" => $usedgroupID['value'],
@@ -169,7 +157,7 @@ inner join kb3_dgmattributetypes on kb3_dgmtypeattributes.attributeID = kb3_dgma
 where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeName = 'launcherGroup'");
 								$usedgroupID = $qry2->getRow();
 
-								$ammo_array[ShipSlotEnum::MIDSLOT][] = Array(
+								$ammo_array[ShipSlotEnum::MIDSLOT][] = array(
 									"name" => $row['typeName'],
 									"groupID" => $row['groupID'],
 									"usedgroupID" => $usedgroupID['value'],
@@ -186,7 +174,7 @@ where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeN
 							}
 						} else {
 							if ($row['groupID'] == 908) {
-								$fitting_array[ShipSlotEnum::AMMO][] = Array(
+								$fitting_array[ShipSlotEnum::AMMO][] = array(
 									"name" => $row['typeName'],
 									"groupID" => $row['groupID'],
 									"usedgroupID" => $usedgroupID['value'],
@@ -203,7 +191,7 @@ where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeN
 
 							} else {
 
-								$fitting_array[$row['itt_slot']][] = Array(
+								$fitting_array[$row['itt_slot']][] = array(
 									"name" => $row['typeName'],
 									"groupID" => $row['groupID'],
 									"chargeSize" => "",
@@ -256,19 +244,18 @@ where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeN
 						$i = 0;
 						while (!($found) && $i < $length) {
 							$temp = array_shift($ammo_array[ShipSlotEnum::HIGHSLOT]);
-
-							if (($temp["usedgroupID"] == $group) && ($temp["size"] == $size)) {
-								$fitting_array[ShipSlotEnum::AMMO][] = Array(
-									'name' => $temp["name"],
-									'itemid' => $temp["itemid"],
-									"id" => $temp['id'],
-									"capacity" => $temp['capacity'],
-									"mass" => $temp['mass'],
-									"volume" => $temp['volume'],
-									"icon" => $temp['icon'],
-									"slot" => $temp['itt_slot'],
-									"meta" => $temp['meta'],
-									"tech" => $temp['tech']
+							if (($temp["usedgroupID"] == $group)) {
+								$fitting_array[ShipSlotEnum::AMMO][] = array(
+									'name' => $temp['name'],
+									'itemid' => $temp['itemid'],
+									'id' => $temp['id'],
+									'capacity' => $temp['capacity'],
+									'mass' => $temp['mass'],
+									'volume' => $temp['volume'],
+									'icon' => $temp['icon'],
+									'slot' => $temp['itt_slot'],
+									'meta' => $temp['meta'],
+									'tech' => $temp['tech']
 								);
 								$found = 1;
 							}
@@ -305,7 +292,7 @@ where typeID = '" . $row['itd_itm_id'] . "' and kb3_dgmattributetypes.attributeN
 						while (!($found) && $i < $length) {
 							$temp = array_shift($ammo_array[ShipSlotEnum::MIDSLOT]);
 							if ($temp["usedgroupID"] == $group) {
-								$fitting_array[ShipSlotEnum::AMMO][] = Array(
+								$fitting_array[ShipSlotEnum::AMMO][] = array(
 									'name' => $temp["name"],
 									'itemid' => $temp["itemid"],
 									"id" => $temp['id'],
