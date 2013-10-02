@@ -143,7 +143,7 @@ class fittingTools {
 			$km = Cacheable::factory('Kill', $home->kll_id);
 		} else {
 			$km = new Kill($home->kll_external_id, true);
-			$km = $home->kill->getID();
+			$kmId = $home->kill->getID();
 		}
         /** @var Kill $km */
 
@@ -392,7 +392,7 @@ class fittingTools {
 		self::$shipStats->setPilotAllianceURL($victimAllianceURL);
 		self::$shipStats->setPilotShipURL($victimShipID);
 		self::$shipStats->setPilotLocURL($systemURL);
-
+bd($theFit, 'the fit');
 		fittingTools::getShipStats($shipname);
 		fittingTools::moduleInfo($theFit);
 //		fittingTools::getModuleStats();
@@ -570,34 +570,6 @@ class fittingTools {
 				self::$loadPower += $arr_prg[$i]['power'];
 			}
 		}
-
-		/*echo "<pre>";
-		print_r($arr_prg);
-		echo "</pre>";*/
-
-		/*echo "<pre>";
-		print_r($arr_cpu);
-		echo "</pre>";*/
-
-		/*echo "<pre>";
-		print_r(self::$shipStats->getCpuUsed());
-		echo "</pre>";*/
-
-		/*echo "<pre>";
-		print_r(self::$shipStats->getPrgUsed());
-		echo "</pre>";*/
-
-		/*echo "<pre>";
-		print_r(self::$shipStats->getShipEffects());
-		echo "</pre>";*/
-
-		/*echo "<pre>";
-		print_r(self::$loadPowerAdd);
-		echo "</pre>";*/
-
-		/*echo "<pre>";
-		print_r(self::$loadCPUAdd);
-		echo "</pre>";*/
 
 	}
 
@@ -905,12 +877,12 @@ where typeID = " . $typeID['typeID']);
 		self::$shipStats->setDamage(fittingTools::getDPS());
 		self::$shipStats->setVolley(fittingTools::getVolley());
 
-		/*echo "<pre>";
-	print_r(self::$shipStats->getDamageGun());
-	print_r(self::$shipStats->getDamageModules());
-	//print_r(self::$shipStats->getDroneDamage());
-	//print_r(self::$shipStats->getDroneDamageMod());
-	echo "</pre>";*/
+//		echo "<pre>";
+//	print_r(self::$shipStats->getDamageGun());
+//	print_r(self::$shipStats->getDamageModules());
+//	//print_r(self::$shipStats->getDroneDamage());
+//	//print_r(self::$shipStats->getDroneDamageMod());
+//	echo "</pre>";
 
 		//print_r(self::$shipStats->getCapGJ());
 
@@ -1605,7 +1577,6 @@ where typeID = " . $typeID['typeID']);
 
 	static function getDPSAndVolley() {
 
-		$avDPS;
 		$condition = "";
 		$i = 0;
 
@@ -2331,58 +2302,32 @@ where typeID = " . $typeID['typeID']);
 	public static $cargoSlots;
 
 	static function moduleInfo($param_moduleArray) {
-
+bd($param_moduleArray, '$param_moduleArray');
 		$low = 0;
 		$mid = 0;
 		$hig = 0;
 		$rig = 0;
 
-		$slots = array(
-			7 => "",
-			3 => "[empty low slot]",
-			2 => "[empty mid slot]",
-			1 => "[empty high slot]",
-			5 => "[empty rig slot]",
-			6 => "",
-			10 => "",
-			11 => "");
+		$slots = ShipSlotEnum::getValues();
 
-		/*echo "<pre>";
-	print_r($param_moduleArray);
-	echo "</pre>";*/
+		$moduleArr = [];
+//		$moduleArr = array_map(function ($module) {
+//
+//
+//		}, $param_moduleArray);
 
-		/*
-
-	[0] => Array
-    (
-		[name] => E500 Prototype Energy Vampire
-		[groupID] => 68
-		[chargeSize] =>
-		['itemid'] => 16501
-		[id] => 16501
-		[capacity] => 0
-		[mass] => 1000
-		[volume] => 5
-		[icon] => 01_03
-		[slot] => 1
-    )
-
-	*/
-
-		foreach ($slots as $j => $slot) {
-			$moduleArr = null;
-			$moduleArr = Array();
-
-			if ($param_moduleArray[$j]) {
-				foreach ($param_moduleArray[$j] as $i => $value) {
+		foreach ($slots as $slot) {
+			if ($param_moduleArray[$slot]) {
+				foreach ($param_moduleArray[$slot] as $value) {
 					//echo $value['itemid']." -> <br />";
+					bd($value, 'value');
 
 					$item = new Item($value['itemid']);
 
 					if (array_key_exists($value['itemid'], $moduleArr)) {
 						//echo $value['itemid']." -> ".$moduleArr[$value['itemid']]['name']." - > ".self::$moduleCount." -> ".$moduleArr[$value['itemid']]["ignore"]."<br />";
 						if ($moduleArr[$value['itemid']]["ignore"] !== true) {
-							self::$modSlots[$j][] = array('id' => $moduleArr[$value['itemid']]['id'], 'name' => $moduleArr[$value['itemid']]['name'], 'groupID' => $moduleArr[$value['itemid']]['groupID'], 'icon' => $moduleArr[$value['itemid']]['icon'], 'iconloc' => $moduleArr[$value['itemid']]['iconloc'], 'metaLevel' => $moduleArr[$value['itemid']]["metaLevel"], 'techLevel' => $moduleArr[$value['itemid']]["techLevel"], 'capacity' => $moduleArr[$value['itemid']]['capacity'], 'volume' => $moduleArr[$value['itemid']]['volume'], 'mass' => $moduleArr[$value['itemid']]['mass']);
+							self::$modSlots[$slot][] = array('id' => $moduleArr[$value['itemid']]['id'], 'name' => $moduleArr[$value['itemid']]['name'], 'groupID' => $moduleArr[$value['itemid']]['groupID'], 'icon' => $moduleArr[$value['itemid']]['icon'], 'iconloc' => $moduleArr[$value['itemid']]['iconloc'], 'metaLevel' => $moduleArr[$value['itemid']]["metaLevel"], 'techLevel' => $moduleArr[$value['itemid']]["techLevel"], 'capacity' => $moduleArr[$value['itemid']]['capacity'], 'volume' => $moduleArr[$value['itemid']]['volume'], 'mass' => $moduleArr[$value['itemid']]['mass']);
 
 							$valueinput = explode(",", $moduleArr[$value['itemid']]['value']);
 							$attributeName = explode(",", $moduleArr[$value['itemid']]['attributeName']);
@@ -2401,11 +2346,11 @@ where typeID = " . $typeID['typeID']);
 									}
 
 									$neg = fittingTools::negRules($stackable[$k], $unit[$k]);
-									if ($j == 6) {
-										fittingTools::applyDroneSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $j);
+									if ($slot == 6) {
+										fittingTools::applyDroneSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $slot);
 									} else {
 										//echo $moduleArr[$value['itemid']]['name']."<br />";
-										fittingTools::applyShipSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $j, $moduleArr[$value['itemid']]['mass']);
+										fittingTools::applyShipSkills(abs($valueinput[$k]), "+", $type, $attributeName[$k], false, 1, $neg, $moduleArr[$value['itemid']]['groupID'], $moduleArr[$value['itemid']]['capacity'], $moduleArr[$value['itemid']]['name'], $moduleArr[$value['itemid']]["techLevel"], $slot, $moduleArr[$value['itemid']]['mass']);
 									}
 								}
 							}
@@ -2425,10 +2370,10 @@ where typeID = " . $typeID['typeID']);
 							self::$shipStats->setIsAB(true);
 						}
 						//self::$modSlots[$j][] = array('id'=> $value['id'],'name'=> $value['name'], 'icon'=> $value['itemid'], 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
-						if ($j == 10 || $j == 6) {
-							self::$modSlots[$j][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(32), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
+						if ($slot == 10 || $slot == 6) {
+							self::$modSlots[$slot][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(32), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
 						} else {
-							self::$modSlots[$j][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(64, false), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
+							self::$modSlots[$slot][] = array('id' => $value['id'], 'name' => $value['name'], 'groupID' => $value['groupID'], 'icon' => $value['icon'], 'iconloc' => $item->getIcon(64, false), 'metaLevel' => $value["meta"], 'techLevel' => $value["tech"], 'capacity' => $value["capacity"], 'volume' => $value["volume"], 'mass' => $value["mass"]);
 						}
 						/*echo "<br/>-----------------------<br/>";
 					echo "<pre>";
@@ -2436,7 +2381,7 @@ where typeID = " . $typeID['typeID']);
 					echo "</pre>";*/
 						//echo "not found -> ".$typeID['typeName']." ".$value['itemid']."<br />";
 
-						if ($j == 7) {
+						if ($slot == 7) {
 							self::$shipStats->setMass(fittingTools::statOntoShip(self::$shipStats->getMass(), fittingTools::calculateMass($value['mass']), "+", "+", 1));
 						}
 
@@ -2464,8 +2409,8 @@ where typeID = " . $value['itemid']);
 							}
 
 							$neg = fittingTools::negRules($row['stackable'], $row['unit']);
-
-							if ($j == 6) {
+							$drone_count = 0;
+							if ($slot == 86) {
 								//applyDroneSkills
 								//echo fittingTools::dumpDrones($typeID['typeName'])."<br />";
 								if (fittingTools::applyDroneSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], $value['volume'], $value['name'], $value["tech"], 6)) {
@@ -2499,9 +2444,8 @@ where typeID = " . $value['itemid']);
 
 							} else {
 
-								if (fittingTools::applyShipSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], (($j == 10) ? $value['volume'] : $value['capacity']), $value['name'], $value["tech"], $j, $value['mass'])) {
-									//echo $value['name']." - ".abs($row['value']). " - G". $value['groupID'] ." - ".$type." -".$row['attributeName']." -".$neg." - I".$typeID['icon']." -".$typeID['capacity']." -".$typeID['typeName']." -".$tech["value"]." -".$j."<br/>";
-									//echo $j." - ".$value['icon']." - ".$moduleArr[$value['itemid']]['iconloc']." - ".$value['itemid']."<br />";
+								if (fittingTools::applyShipSkills(abs($row['value']), "+", $type, $row['attributeName'], false, 1, $neg, $value['groupID'], (($slot == 10) ? $value['volume'] : $value['capacity']), $value['name'], $value["tech"], $slot, $value['mass'])) {
+
 									$moduleArr[$value['itemid']]['value'] .= $row['value'] . ",";
 									$moduleArr[$value['itemid']]['attributeName'] .= $row['attributeName'] . ",";
 									$moduleArr[$value['itemid']]['displayName'] .= $row['displayName'] . ",";
@@ -2516,7 +2460,7 @@ where typeID = " . $value['itemid']);
 
 									$moduleArr[$value['itemid']]['icon'] = $value['icon'];
 
-									if ($j == 10 || $j == 6) {
+									if ($slot == 10 || $slot == 6) {
 										$moduleArr[$value['itemid']]['iconloc'] = $item->getIcon(32);
 										//echo "10 ".$moduleArr[$value['itemid']]['icon']."<br />";
 									} else {
@@ -2525,7 +2469,7 @@ where typeID = " . $value['itemid']);
 										//echo $moduleArr[$value['itemid']]['icon']."<br />";
 									}
 
-									$moduleArr[$value['itemid']]['capacity'] = (($j == 10) ? $value['volume'] : $value['capacity']);
+									$moduleArr[$value['itemid']]['capacity'] = (($slot == 10) ? $value['volume'] : $value['capacity']);
 									$moduleArr[$value['itemid']]['volume'] = $value['volume'];
 									$moduleArr[$value['itemid']]['mass'] = $value['mass'];
 								}
@@ -2534,25 +2478,26 @@ where typeID = " . $value['itemid']);
 
 						}
 					}
-					if ($j != 10) {
+					if ($slot != 10) {
 						self::$moduleCount++;
 					}
 
 					/////////////////////////////////////////
 
-					if ($j == 1) {
+					if ($slot == 1) {
 						$hig++;
-					} else if ($j == 2) {
+					} else if ($slot == 2) {
 						$mid++;
-					} else if ($j == 3) {
+					} else if ($slot == 3) {
 						$low++;
-					} else if ($j == 5) {
+					} else if ($slot == 5) {
 						$rig++;
 					}
 
 				}
 			}
 		}
+bd($moduleArr, 'modulearr');
 		/*echo "<pre>";
 	print_r(self::$droneArr);
 	echo "</pre>";*/
@@ -2562,23 +2507,23 @@ where typeID = " . $value['itemid']);
 		$arr = self::$shipStats->getShipSlots();
 
 		for ($h = $hig; $h < $arr['hislots']; $h++) {
-			self::$modSlots[1][] = array('id' => 0, 'name' => 'Empty High Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_hig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+			self::$modSlots[ShipSlotEnum::HIGHSLOT][] = array('id' => 0, 'name' => 'Empty High Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_hig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 		}
 
 		for ($m = $mid; $m < $arr['medslots']; $m++) {
-			self::$modSlots[2][] = array('id' => 0, 'name' => 'Empty Mid Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_mid.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+			self::$modSlots[ShipSlotEnum::MIDSLOT][] = array('id' => 0, 'name' => 'Empty Mid Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_mid.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 		}
 
 		for ($l = $low; $l < $arr['lowslots']; $l++) {
-			self::$modSlots[3][] = array('id' => 0, 'name' => 'Empty Low Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_low.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+			self::$modSlots[ShipSlotEnum::LOWSLOT][] = array('id' => 0, 'name' => 'Empty Low Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_low.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 		}
 
 		for ($r = $rig; $r < $arr['rigslots']; $r++) {
-			self::$modSlots[5][] = array('id' => 0, 'name' => 'Empty Rig Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_rig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
+			self::$modSlots[ShipSlotEnum::RIGSLOT][] = array('id' => 0, 'name' => 'Empty Rig Slot', 'iconloc' => ((self::$simpleurl) ? fittingTools::curPageURL() : "") . 'mods/ship_display_tool/images/equipment/icon00_rig.png', 'metaLevel' => 0, 'techLevel' => 0, 'capacity' => 0, 'volume' => 0, 'mass' => 0);
 		}
 
-		if (!empty(self::$modSlots[7])) {
-			foreach (self::$modSlots[7] as $i => $value) {
+		if (!empty(self::$modSlots[ShipSlotEnum::SUBSYSTEM])) {
+			foreach (self::$modSlots[ShipSlotEnum::SUBSYSTEM] as $i => $value) {
 				fittingTools::subsystemaddon($value['name']);
 			}
 		}
@@ -5415,12 +5360,12 @@ where typeID = " . $value['itemid']);
 		//$smarty->assign('left', $left);
 		//$smarty->assign('top', $top);
 		$smarty->assign('getShipIcon', self::$shipStats->getShipIcon());
-		$smarty->assign('backdropImgType', $backdropImgType);
-		$smarty->assign('modSlotsh', self::$modSlots[1]);
-		$smarty->assign('modSlotsm', self::$modSlots[2]);
-		$smarty->assign('modSlotsl', self::$modSlots[3]);
-		$smarty->assign('modSlotsr', self::$modSlots[5]);
-		$smarty->assign('modSlotss', self::$modSlots[7]);
+		$smarty->assign('backdropImgType', false);
+		$smarty->assign('modSlotsh', self::$modSlots[ShipSlotEnum::HIGHSLOT]);
+		$smarty->assign('modSlotsm', self::$modSlots[ShipSlotEnum::MIDSLOT]);
+		$smarty->assign('modSlotsl', self::$modSlots[ShipSlotEnum::LOWSLOT]);
+		$smarty->assign('modSlotsr', self::$modSlots[ShipSlotEnum::RIGSLOT]);
+		$smarty->assign('modSlotss', self::$modSlots[ShipSlotEnum::SUBSYSTEM]);
 
 		$smarty->assign('getPilotNameURL', self::$shipStats->getPilotNameURL());
 		$smarty->assign('getPilotPort', self::$shipStats->getPilotPort());
@@ -6619,6 +6564,3 @@ where typeID = " . $value['itemid']);
 	}
 
 }
-
-//echo $fitter;
-?>
